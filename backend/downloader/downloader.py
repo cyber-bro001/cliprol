@@ -1,12 +1,19 @@
 import yt_dlp
 
-print(yt_dlp.utils.check_executable("ffmpeg"))
 
+def download_video(url):
 
-def dowload_video(url):
     options = {
-        "format": "bv*+ba/b",
+        "format": "bv*[height<=720]+ba/b",
         "merge_output_format": "mp4",
+
+        "postprocessor_args": {
+            "merger": [
+                "-c:v", "libx264",
+                "-c:a", "aac",
+                "-b:a", "192k"
+            ]
+        },
         "outtmpl": "storage/videos/%(title)s.%(ext)s"
     }
 
