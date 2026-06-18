@@ -12,12 +12,13 @@ def download_video(url, folder):
     }
 
     with yt_dlp.YoutubeDL(options) as ydl:
-       ydl.download([url])
+       info = ydl.extract_info(url, download=True)
 
-       input_file = f"{folder}/raw.webm"
+       input_file = info["requested_downloads"][0]["filepath"]
+
        output_file = f"{folder}/final.mp4"
 
-    subprocess.run([
+       subprocess.run([
        "ffmpeg",
        "-i",
        input_file,
@@ -31,10 +32,10 @@ def download_video(url, folder):
        "-b:a",
        "192k",
        
-       output_file,
-       "-y"
-       ])
+       "-y",
+       output_file
+       ], check=True)
     
-    os.remove(input_file)
+       os.remove(input_file)
     
-    return output_file
+       return output_file

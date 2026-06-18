@@ -11,13 +11,15 @@ def create_clip(video_path, duration, folder):
 
     output = f"{folder}/clip.mp4"
 
-    clip.write_videofile(
+    try:
+        clip.write_videofile(
         output,
         codec="libx264",
         audio_codec="aac"
     )
 
-    video.close()
-    clip.close()
-
+    finally:
+         video.close()
+         clip.close()
+         
     return output
