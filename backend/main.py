@@ -2,9 +2,14 @@ from fastapi import FastAPI, HTTPException
 import uuid
 import os
 import asyncio
+from dotenv import load_dotenv
 
 from downloader.downloader import download_video
 from editor.editor import create_clip
+
+load_dotenv()
+
+BASE_STORAGE = os.getenv("STORAGE_PATH", "storage/videos")
 
 app = FastAPI()
 
@@ -15,7 +20,7 @@ async def process_video(url: str):
     try:
 
         job_id = str(uuid.uuid4())
-        folder = f"storage/videos/{job_id}"
+        folder = f"{BASE_STORAGE}/{job_id}"
         os.makedirs(folder, exist_ok=True)
 
         loop = asyncio.get_event_loop()
