@@ -1,15 +1,15 @@
 from moviepy import VideoFileClip
 
 
-def create_clip(video_path):
+def create_clip(video_path, duration, folder):
 
     video = VideoFileClip(video_path)
 
-    end = min(video.duration, 30)
+    end = min(video.duration, duration)
 
     clip = video.subclipped(0, end)
 
-    output = "storage/videos/clip.mp4"
+    output = f"{folder}/clip.mp4"
 
     clip.write_videofile(
         output,
