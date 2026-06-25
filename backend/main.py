@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 
 from downloader.downloader import download_video
 from editor.editor import create_clip
-from editor.transcriber import transcribe_video
 from detector.detector import moment_detection
 
 load_dotenv()
@@ -28,14 +27,11 @@ async def process_video(url: str):
         loop = asyncio.get_event_loop()
 
         video =  await loop.run_in_executor(None, lambda: download_video(url, folder)) 
+        #remember to remove this
         print(f"[DEBUG] Video downloaded: {video}")
 
-
-        json_file = await loop.run_in_executor(None, lambda: transcribe_video(video, folder))
-        print(f"[DEBUG] JSON file: {json_file}")
-        print(f"[DEBUG] JSON exists: {os.path.exists(json_file)}")
-
-        moments = await loop.run_in_executor(None, lambda: moment_detection(json_file))
+        moments = await loop.run_in_executor(None, lambda: moment_detection(video))
+        #remeber to remove this
         print(f"[DEBUG] Moments: {moments}")
         
 
