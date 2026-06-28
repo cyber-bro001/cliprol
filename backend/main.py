@@ -38,15 +38,18 @@ async def process_video(url: str):
         clips = []
 
         for moment in moments:
-            start_time = moment["timestamp"]
-            duration = 30 #30 seconds clip
+            start_time = moment["start"]
+            end_time = moment["end"]
 
             clip = await loop.run_in_executor(
                 None,
-                lambda st=start_time, d=duration: create_clip(video, st, d, folder)
+                lambda st=start_time, ed=end_time: create_clip(video, st, ed, folder)
             )
             clips.append(clip)
 
+            if not moments:
+                os.remove(video)
+                return {"status": "success", "moments_detected": 0, "clips": [], "message": "No moments detected!"}
         return {
             "status": "success",
             "moments_detected": len(moments),
@@ -60,3 +63,4 @@ async def process_video(url: str):
         import traceback
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
+    

@@ -2,7 +2,7 @@ from moviepy import VideoFileClip
 import os
 
 
-def create_clip(video_path, start_time, duration, folder):
+def create_clip(video_path, start_time, end_time, folder):
     """
     Extract a clip from a video starting at start_time.
     
@@ -18,9 +18,9 @@ def create_clip(video_path, start_time, duration, folder):
 
     video = VideoFileClip(video_path)
 
-    end_time = min(video.duration, start_time + duration)
+    final_end_time = min(video.duration, end_time)
 
-    clip = video.subclipped(0, end_time)
+    clip = video.subclipped(start_time, final_end_time)
 
     output = f"{folder}/clip_{int(start_time)}.mp4"
 

@@ -7,7 +7,7 @@ def download_video(url, folder):
 
     options = {
         "format": "bv*[height<=720]+ba/b",
-        "merge_output_format": "webm",
+        "merge_output_format": "mp4",
         "outtmpl": f"{folder}/raw.%(ext)s"
     }
 
