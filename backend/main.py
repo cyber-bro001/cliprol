@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 import uuid
 import os
 import asyncio
@@ -15,25 +15,21 @@ BASE_STORAGE = os.getenv("STORAGE_PATH", "storage/videos")
 app = FastAPI()
 
 
-@app.post("/process")
-async def process_video(url: str):
-
+async def process_pipeline(video, folder):
     try:
-
-        job_id = str(uuid.uuid4())
-        folder = f"{BASE_STORAGE}/{job_id}"
-        os.makedirs(folder, exist_ok=True)
-
         loop = asyncio.get_event_loop()
 
-        video =  await loop.run_in_executor(None, lambda: download_video(url, folder)) 
-        #remember to remove this
-        print(f"[DEBUG] Video downloaded: {video}")
-
         moments = await loop.run_in_executor(None, lambda: moment_detection(video))
-        #remeber to remove this
         print(f"[DEBUG] Moments: {moments}")
-        
+
+        if not moments:
+            os.remove(video)
+            return {
+                "status": "success",
+                "moments_detected": 0,
+                "clips": [],
+                "message": "No moments detected"
+            }
 
         clips = []
 
@@ -47,9 +43,8 @@ async def process_video(url: str):
             )
             clips.append(clip)
 
-            if not moments:
-                os.remove(video)
-                return {"status": "success", "moments_detected": 0, "clips": [], "message": "No moments detected!"}
+        os.remove(video)
+
         return {
             "status": "success",
             "moments_detected": len(moments),
@@ -57,10 +52,49 @@ async def process_video(url: str):
             "moments": moments
         }
 
-
     except Exception as e:
-        print(f"[ERROR] {str(0)}")
         import traceback
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
+@app.post("/process")
+async def process_video(url: str):
+    try:
+        job_id = str(uuid.uuid4())
+        folder = f"{BASE_STORAGE}/{job_id}"
+        os.makedirs(folder, exist_ok=True)
+
+        loop = asyncio.get_event_loop()
+
+        video = await loop.run_in_executor(None, lambda: download_video(url, folder))
+        print(f"[DEBUG] Video downloaded: {video}")
+
+        return await process_pipeline(video, folder)
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/upload")
+async def process_upload(file: UploadFile = File(...)):
+    try:
+        job_id = str(uuid.uuid4())
+        folder = f"{BASE_STORAGE}/{job_id}"
+        os.makedirs(folder, exist_ok=True)
+
+        video_path = f"{folder}/final.mp4"
+
+        contents = await file.read()
+
+        with open(video_path, "wb") as f:
+            f.write(contents)
+
+        return await process_pipeline(video_path, folder)
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))

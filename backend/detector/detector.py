@@ -46,7 +46,7 @@ Rules:
 - Do not include boring introductions
 - Do not include greetings
 - Do not include dead space
-- Keep clips between 45 and 60 seconds
+- Keep clips between 30 and 60 seconds
 - Choose only the strongest moments
 
 Return ONLY valid JSON.
