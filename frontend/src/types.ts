@@ -1,0 +1,1 @@
+export type PageType = "landing" | "processing" | "results";
