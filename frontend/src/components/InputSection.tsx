@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {PageType} from "../types";
+import type {ClipsType} from "../types";
 
 type InputSectionProps = {
-  page: PageType;
+  setPage: (page: PageType) => void;
+  setClips: (clips: ClipsType) => void;
 };
 
-const InputSection = ({ setPage }: InputSectionProps)  => {
+const InputSection = ({ setPage, setClips})  => {
   const [videoUrl, setVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [mode, setMode] = useState<"url" | "upload">("url");
+  
+  useEffect(() => {
+    const processVideo = async () => {
+      const response = fetch("")
+    }
+  }, []);
 
   return (
     <section className="max-w-3xl mx-auto px-6 pb-16">
@@ -123,7 +131,7 @@ const InputSection = ({ setPage }: InputSectionProps)  => {
       )}
 
       {/* Submit */}
-      <button className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150" onClick={() => setPage("processing")}>
+      <button className="w-full bg-[var(--color-accent)] hover:text-[var(--color-bg)] text-[var(--color-text)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150" onClick={() => setPage("processing")}>
         Find the moments
       </button>
 

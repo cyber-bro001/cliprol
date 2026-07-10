@@ -11,7 +11,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 bg-[var(--color-bg)] border-b border-[var(--color-border)]">
-      <nav className="flex items-center justify-between py-8 px-6 md:px-12">
+      <nav className="flex items-center justify-between py-4 px-6 md:px-12">
         <a
           href="/"
           className="text-[var(--color-text)] font-semibold text-base"
@@ -40,7 +40,7 @@ const Header = () => {
           </a>
           <a
             href="/signup"
-            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)]"
+            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] text-[var(--color-text)] px-4 py-2 rounded-[var(--radius-sm)]"
           >
             Try it free
           </a>
@@ -78,7 +78,7 @@ const Header = () => {
           </a>
           <a
             href="/signup"
-            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)] text-center"
+            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] text-[var(--color-text)] px-4 py-2 rounded-[var(--radius-sm)] text-center"
           >
             Try it free
           </a>

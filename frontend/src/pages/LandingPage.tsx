@@ -2,19 +2,20 @@ import Hero from "../components/Hero";
 import InputSection from "../components/InputSection";
 
 import type { PageType } from "../types";
+import type {ClipsType} from "../types";
 
 type LandingPageProps = {
   setPage: (page: PageType) => void;
+  setClips: (clips: ClipsType) => void;
 };
 
 const LandingPage = (
-  { setPage }: LandingPageProps,
-  setClips: (clips: string[]) => void,
+  { setPage, setClips }
 ) => {
   return (
     <div>
       <Hero />
-      <InputSection setPage={setPage} />
+      <InputSection setPage={setPage} setClips={setClips} />
     </div>
   );
 };

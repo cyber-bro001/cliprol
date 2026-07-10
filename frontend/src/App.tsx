@@ -10,7 +10,7 @@ const App = () => {
     "landing",
   );
   const [clips, setClips] = useState<string[]>([]);
-
+  
   return (
     <div>
       <Header />
