@@ -1,22 +1,63 @@
-import { useState, useEffect } from "react";
-import type {PageType} from "../types";
-import type {ClipsType} from "../types";
+import { useState } from "react";
+import type { PageType } from "../types";
+import type { ClipsType } from "../types";
+
+import { processVideoUrl, processVideoFile } from "../lib/api";
+//import { error } from "console";
 
 type InputSectionProps = {
   setPage: (page: PageType) => void;
   setClips: (clips: ClipsType) => void;
+  setError: (error: string | null) => void;
+  error: string | null;
 };
 
-const InputSection = ({ setPage, setClips})  => {
+const InputSection = ({
+  setPage,
+  setClips,
+  setError,
+  error,
+}: InputSectionProps) => {
   const [videoUrl, setVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [mode, setMode] = useState<"url" | "upload">("url");
-  
-  useEffect(() => {
-    const processVideo = async () => {
-      const response = fetch("")
+
+  const processVideo = async () => {
+    // Validate first before navigating
+    if (mode === "url" && !videoUrl.trim()) {
+      setError("Please enter a valid YouTube link");
+      return;
     }
-  }, []);
+
+    if (mode === "upload" && !videoFile) {
+      setError("Please upload a video file");
+      return;
+    }
+
+    // Only navigate after validation passes
+    setPage("processing");
+    setError(null);
+
+    try {
+      let response;
+
+      if (mode === "url") {
+        response = await processVideoUrl(videoUrl);
+      } else {
+        response = await processVideoFile(videoFile!);
+      }
+
+      const data = await response.json();
+      setClips(data.clips || []);
+      setPage("results");
+    } catch (error) {
+      setError(
+        "An error occurred while processing the video. Please try again.",
+      );
+      setPage("landing");
+      console.error("Error processing video:", error);
+    }
+  };
 
   return (
     <section className="max-w-3xl mx-auto px-6 pb-16">
@@ -24,7 +65,7 @@ const InputSection = ({ setPage, setClips})  => {
       <div className="flex border-b border-[var(--color-border)] mb-6">
         <button
           onClick={() => setMode("url")}
-          className={`px-0 py-3 mr-8 text-sm font-medium border-b-2 transition-colors duration-150 ${
+          className={`px-0 py-3 mr-8 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
             mode === "url"
               ? "border-[var(--color-accent)] text-[var(--color-text)]"
               : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -34,7 +75,7 @@ const InputSection = ({ setPage, setClips})  => {
         </button>
         <button
           onClick={() => setMode("upload")}
-          className={`px-0 py-3 text-sm font-medium border-b-2 transition-colors duration-150 ${
+          className={`px-0 py-3 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
             mode === "upload"
               ? "border-[var(--color-accent)] text-[var(--color-text)]"
               : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -91,7 +132,7 @@ const InputSection = ({ setPage, setClips})  => {
                 </div>
                 <button
                   onClick={() => setVideoFile(null)}
-                  className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-150"
+                  className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-150 cursor-pointer"
                 >
                   Change file
                 </button>
@@ -130,8 +171,15 @@ const InputSection = ({ setPage, setClips})  => {
         </div>
       )}
 
+      {error && <p className="text-xs text-red-400 mb-4">{error}</p>}
+
       {/* Submit */}
-      <button className="w-full bg-[var(--color-accent)] hover:text-[var(--color-bg)] text-[var(--color-text)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150" onClick={() => setPage("processing")}>
+      <button
+        className="w-full bg-[var(--color-accent)] hover:text-[var(--color-bg)] text-[var(--color-text)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150 cursor-pointer"
+        onClick={() => {
+          processVideo();
+        }}
+      >
         Find the moments
       </button>
 

@@ -6,7 +6,7 @@ const Hero = () => {
       </p>
 
       <h1 className="text-4xl md:text-6xl xl:text-8xl font-bold leading-[1.05] tracking-tight text-[var(--color-text)] mb-6">
-        Your videos are {/*<br className="hidden md:block" />*/} full of moments.
+        Your videos are <br className="" /> full of moments.
       </h1>
 
       <h2 className="text-xl md:2xl font-normal text-[var(--color-text-muted)] leading-snug mb-6">

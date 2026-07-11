@@ -7,15 +7,17 @@ import type {ClipsType} from "../types";
 type LandingPageProps = {
   setPage: (page: PageType) => void;
   setClips: (clips: ClipsType) => void;
+  setError: (error: string | null) => void;
+  error: string | null;
 };
 
 const LandingPage = (
-  { setPage, setClips }
+  { setPage, setClips, setError, error }: LandingPageProps
 ) => {
   return (
     <div>
       <Hero />
-      <InputSection setPage={setPage} setClips={setClips} />
+      <InputSection setPage={setPage} setClips={setClips} setError={setError} error={error} />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import os
 import asyncio
@@ -13,6 +14,14 @@ load_dotenv()
 BASE_STORAGE = os.getenv("STORAGE_PATH", "storage/videos")
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 async def process_pipeline(video, folder):
@@ -58,7 +67,7 @@ async def process_pipeline(video, folder):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/process")
+@app.post("/process-url")
 async def process_video(url: str):
     try:
         job_id = str(uuid.uuid4())
@@ -78,7 +87,7 @@ async def process_video(url: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/upload")
+@app.post("/upload-video")
 async def process_upload(file: UploadFile = File(...)):
     try:
         job_id = str(uuid.uuid4())
