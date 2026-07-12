@@ -26,7 +26,7 @@ const InputSection = ({
     // Validate first before navigating
     if (mode === "url" && !videoUrl.trim()) {
       setError("Please enter a valid YouTube link");
-      return;
+      return setPage("results"); //REMEMBER TO REMOVE THIS!
     }
 
     if (mode === "upload" && !videoFile) {
@@ -62,7 +62,7 @@ const InputSection = ({
   return (
     <section className="max-w-3xl mx-auto px-6 pb-16">
       {/* Tabs */}
-      <div className="flex border-b border-[var(--color-border)] mb-6">
+      <div className="flex items-center justify-center border-b border-[var(--color-border)] mb-6">
         <button
           onClick={() => setMode("url")}
           className={`px-0 py-3 mr-8 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
@@ -175,7 +175,7 @@ const InputSection = ({
 
       {/* Submit */}
       <button
-        className="w-full bg-[var(--color-accent)] hover:text-[var(--color-bg)] text-[var(--color-text)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150 cursor-pointer"
+        className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150 cursor-pointer"
         onClick={() => {
           processVideo();
         }}
@@ -184,16 +184,10 @@ const InputSection = ({
       </button>
 
       {/* Trust signals */}
-      <div className="w-full flex items-center gap-6 mt-4 justify-center">
-        <span className="text-xs text-[var(--color-text-dim)]">
-          No credit card required
-        </span>
-        <span className="text-xs text-[var(--color-text-dim)]">
-          Works with any video
-        </span>
-        <span className="text-xs text-[var(--color-text-dim)]">
-          Results in minutes
-        </span>
+      <div className="w-full flex items-center gap-6 mt-4 justify-center text-[var(--color-text-muted)]">
+        <span className="text-xs">No credit card required</span>
+        <span className="text-xs">Works with any video</span>
+        <span className="text-xs">Results in minutes</span>
       </div>
     </section>
   );

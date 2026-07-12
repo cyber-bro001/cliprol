@@ -12,7 +12,7 @@
     --color-text-muted: #6B6358;
     --color-text-dim: #3A3530;
     
-    --color-accent: #A0785A;
+    --color-accent: #d08b65;
 
     /* Typography */
     --font-sans: 'Inter', system-ui, sans-serif;
@@ -39,4 +39,25 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+@keyframes pulse-accent {
+  0%{
+    opacity: 0.45%;
+    color: var(--color-text-muted);
+  }
+
+  50%{
+    opacity: 1;
+    color: var(--color-accent);
+  }
+
+  100%{
+    opacity: 0.45%;
+    color: var(--color-text-muted);
+  }
+}
+
+.animate-stage{
+  animation: pulse-accent 1.8s ease-in-out infinite;
 }
