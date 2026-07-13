@@ -21,20 +21,25 @@ const InputSection = ({
   const [videoUrl, setVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [mode, setMode] = useState<"url" | "upload">("url");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const processVideo = async () => {
+    
     // Validate first before navigating
     if (mode === "url" && !videoUrl.trim()) {
       setError("Please enter a valid YouTube link");
-      return setPage("results"); //REMEMBER TO REMOVE THIS!
+      return {/*setPage("results")*/}; //REMEMBER TO REMOVE THIS!
+      setIsProcessing(false);
     }
 
     if (mode === "upload" && !videoFile) {
       setError("Please upload a video file");
       return;
+      setIsProcessing(false);
     }
 
     // Only navigate after validation passes
+    setIsProcessing(true);
     setPage("processing");
     setError(null);
 
@@ -44,11 +49,13 @@ const InputSection = ({
       if (mode === "url") {
         response = await processVideoUrl(videoUrl);
       } else {
-        response = await processVideoFile(videoFile!);
+        if(!videoFile) return;
+        response = await processVideoFile(videoFile);
       }
 
       const data = await response.json();
       setClips(data.clips || []);
+      setIsProcessing(false);
       setPage("results");
     } catch (error) {
       setError(
@@ -56,6 +63,7 @@ const InputSection = ({
       );
       setPage("landing");
       console.error("Error processing video:", error);
+      setIsProcessing(false);
     }
   };
 
@@ -67,7 +75,7 @@ const InputSection = ({
           onClick={() => setMode("url")}
           className={`px-0 py-3 mr-8 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
             mode === "url"
-              ? "border-[var(--color-accent)] text-[var(--color-text)]"
+              ? "border-[var(--color-accent)] text-[var(--color-text)] font-semibold"
               : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
         >
@@ -77,7 +85,7 @@ const InputSection = ({
           onClick={() => setMode("upload")}
           className={`px-0 py-3 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
             mode === "upload"
-              ? "border-[var(--color-accent)] text-[var(--color-text)]"
+              ? "border-[var(--color-accent)] text-[var(--color-text)] font-semibold"
               : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
         >
@@ -117,7 +125,7 @@ const InputSection = ({
             <div className="border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 overflow-hidden relative">
               <video
                 src={URL.createObjectURL(videoFile)}
-                className="w-full h-64 object-cover"
+                className="w-4/5 h-48 mx-auto object-cover"
                 controls
               />
 
@@ -140,7 +148,7 @@ const InputSection = ({
             </div>
           ) : (
             <div
-              className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-sm)] p-12 text-center cursor-pointer hover:border-[var(--color-text-muted)] transition-colors duration-150 mb-4 relative"
+              className="border border-dashed border-[var(--color-border)] rounded-[var(--radius-sm)] p-12 text-center cursor-pointer hover:border-[var(--color-text-muted)] hover:bg-[var(--color-surface2)] transition-colors duration-150 mb-4 relative cursor-pointer"
               onClick={() => document.getElementById("video-upload")?.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -161,7 +169,7 @@ const InputSection = ({
 
               <p className="text-sm text-[var(--color-text-muted)] font-light">
                 Drop your video here or{" "}
-                <span className="text-[var(--color-text)]">browse files</span>
+                <span className="text-[var(--color-text)]">choose one from your device</span>
               </p>
               <p className="text-xs text-[var(--color-text-dim)] mt-2 tracking-wide">
                 MP4 · MOV · AVI — up to 2GB
@@ -171,23 +179,28 @@ const InputSection = ({
         </div>
       )}
 
-      {error && <p className="text-xs text-red-400 mb-4">{error}</p>}
+{error && (
+  <div className="mb-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface2)] px-4 py-3">
+    <p className="text-sm text-[var(--color-text)]">
+      {error}
+    </p>
+  </div>
+)}
 
       {/* Submit */}
-      <button
-        className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-white transition-colors duration-150 cursor-pointer"
-        onClick={() => {
-          processVideo();
-        }}
-      >
-        Find the moments
-      </button>
+<button
+  disabled={isProcessing}
+  onClick={processVideo}
+  className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${isProcessing ? "cursor-wait" : "cursor-pointer"}`}
+>
+  {isProcessing ? "Preparing..." : "Create clips"}
+</button>
 
       {/* Trust signals */}
       <div className="w-full flex items-center gap-6 mt-4 justify-center text-[var(--color-text-muted)]">
-        <span className="text-xs">No credit card required</span>
-        <span className="text-xs">Works with any video</span>
-        <span className="text-xs">Results in minutes</span>
+        <span className="text-xs">No Sign up required</span>
+        <span className="text-xs">YouTube or upload</span>
+        <span className="text-xs">Ready in minutes</span>
       </div>
     </section>
   );

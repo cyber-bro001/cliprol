@@ -1,3 +1,10 @@
 export type PageType = "landing" | "processing" | "results";
 
-export type ClipsType = string[];
+export type ClipType = {
+  video: string;
+  start: string;
+  end: string;
+  reason: string;
+};
+
+export type ClipsType = ClipType[];
