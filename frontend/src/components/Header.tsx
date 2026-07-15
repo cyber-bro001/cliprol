@@ -5,8 +5,9 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: "How it works", href: "#how" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Why Cliprol", href: "#whycliprol" },
+    { label: "How it works", href: "#howitworks" },
+    { label: "FAQ", href: "#faq" },
   ];
 
   return (

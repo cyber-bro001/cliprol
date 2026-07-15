@@ -1,6 +1,6 @@
 const Hero = () => {
   return (
-    <section className="w-full max-w-7xl mx-auto px-6 pt-24 pb-16 text-center">
+    <section id="/" className="w-full max-w-7xl mx-auto px-6 pt-24 pb-16 text-center">
       <p className="text-xs md:text-sm xl:text-base font-medium tracking-[0.2em] uppercase text-[var(--color-text-muted)] mb-8">
         AI-powered video clipping
       </p>

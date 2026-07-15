@@ -196,12 +196,13 @@ const InputSection = ({
   {isProcessing ? "Preparing..." : "Create clips"}
 </button>
 
-      {/* Trust signals */}
+      {/* Trust signals 
       <div className="w-full flex items-center gap-6 mt-4 justify-center text-[var(--color-text-muted)]">
         <span className="text-xs">No Sign up required</span>
         <span className="text-xs">YouTube or upload</span>
         <span className="text-xs">Ready in minutes</span>
       </div>
+      */}
     </section>
   );
 };
