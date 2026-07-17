@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import os
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from downloader.downloader import download_video
 from editor.editor import create_clip
 from detector.detector import moment_detection
+from helpers.sse_helper import sse_helper
 
 load_dotenv()
 
@@ -28,19 +30,27 @@ async def process_pipeline(video, folder):
     try:
         loop = asyncio.get_event_loop()
 
+        yield sse_helper("progress", {"step": "Preparing..."})
+
         moments = await loop.run_in_executor(None, lambda: moment_detection(video))
+
+        yield sse_helper("progress", {"step": "Analyzing content..."})
+
         print(f"[DEBUG] Moments: {moments}")
 
         if not moments:
             os.remove(video)
-            return {
+
+            yield sse_helper("success", {
                 "status": "success",
                 "moments_detected": 0,
                 "clips": [],
                 "message": "No moments detected"
-            }
+            })
 
         clips = []
+
+        yield sse_helper("progress", {"step": "Creating clips..."})
 
         for moment in moments:
             start_time = moment["start"]
@@ -52,14 +62,16 @@ async def process_pipeline(video, folder):
             )
             clips.append(clip)
 
+        yield sse_helper("progress", {"step": "Finalizing..."})
+
         os.remove(video)
 
-        return {
+        yield sse_helper("success", {
             "status": "success",
             "moments_detected": len(moments),
             "clips": clips,
             "moments": moments
-        }
+        })
 
     except Exception as e:
         import traceback
@@ -76,10 +88,12 @@ async def process_video(url: str):
 
         loop = asyncio.get_event_loop()
 
+
         video = await loop.run_in_executor(None, lambda: download_video(url, folder))
         print(f"[DEBUG] Video downloaded: {video}")
 
-        return await process_pipeline(video, folder)
+
+        return StreamingResponse(process_pipeline(video, folder), media_type="text/event-stream")
 
     except Exception as e:
         import traceback
@@ -101,7 +115,7 @@ async def process_upload(file: UploadFile = File(...)):
         with open(video_path, "wb") as f:
             f.write(contents)
 
-        return await process_pipeline(video_path, folder)
+        return StreamingResponse(process_pipeline(video_path, folder), media_type="text/event-stream")
 
     except Exception as e:
         import traceback
