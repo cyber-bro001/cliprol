@@ -6,14 +6,7 @@ import ProcessingPage from "./pages/ProcessingPage";
 import ResultsPage from "./pages/ResultsPage";
 
 const App = () => {
-  const [page, setPage] = useState<"landing" | "processing" | "results">(
-    "landing",
-  );
-
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [clips, setClips] = useState<string[]>([]);
-  
+ 
   return (
     <div>
       <Header />
