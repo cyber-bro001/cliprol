@@ -1,34 +1,23 @@
 import { useState } from "react";
-import type { PageType } from "../types";
-import type { ClipsType } from "../types";
-
 import { processVideoUrl, processVideoFile } from "../lib/api";
-//import { error } from "console";
 
-type InputSectionProps = {
-  setPage: (page: PageType) => void;
-  setClips: (clips: ClipsType) => void;
-  setError: (error: string | null) => void;
-  error: string | null;
-};
+import { useCliprolContext } from "../context/CliprolContext";
 
-const InputSection = ({
-  setPage,
-  setClips,
-  setError,
-  error,
-}: InputSectionProps) => {
+const InputSection = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [mode, setMode] = useState<"url" | "upload">("url");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const { setPage, setClips, setError, error } = useCliprolContext();
+
   const processVideo = async () => {
-    
     // Validate first before navigating
     if (mode === "url" && !videoUrl.trim()) {
       setError("Please enter a valid YouTube link");
-      return {/*setPage("results")*/}; //REMEMBER TO REMOVE THIS!
+      return {
+        /*setPage("results")*/
+      }; //REMEMBER TO REMOVE THIS!
       setIsProcessing(false);
     }
 
@@ -49,7 +38,7 @@ const InputSection = ({
       if (mode === "url") {
         response = await processVideoUrl(videoUrl);
       } else {
-        if(!videoFile) return;
+        if (!videoFile) return;
         response = await processVideoFile(videoFile);
       }
 
@@ -169,7 +158,9 @@ const InputSection = ({
 
               <p className="text-sm text-[var(--color-text-muted)] font-light">
                 Drop your video here or{" "}
-                <span className="text-[var(--color-text)]">choose one from your device</span>
+                <span className="text-[var(--color-text)]">
+                  choose one from your device
+                </span>
               </p>
               <p className="text-xs text-[var(--color-text-dim)] mt-2 tracking-wide">
                 MP4 · MOV · AVI — up to 2GB
@@ -179,22 +170,20 @@ const InputSection = ({
         </div>
       )}
 
-{error && (
-  <div className="mb-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface2)] px-4 py-3">
-    <p className="text-sm text-[var(--color-text)]">
-      {error}
-    </p>
-  </div>
-)}
+      {error && (
+        <div className="mb-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface2)] px-4 py-3">
+          <p className="text-sm text-[var(--color-text)]">{error}</p>
+        </div>
+      )}
 
       {/* Submit */}
-<button
-  disabled={isProcessing}
-  onClick={processVideo}
-  className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${isProcessing ? "cursor-wait" : "cursor-pointer"}`}
->
-  {isProcessing ? "Preparing..." : "Create clips"}
-</button>
+      <button
+        disabled={isProcessing}
+        onClick={processVideo}
+        className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${isProcessing ? "cursor-wait" : "cursor-pointer"}`}
+      >
+        {isProcessing ? "Preparing..." : "Create clips"}
+      </button>
 
       {/* Trust signals 
       <div className="w-full flex items-center gap-6 mt-4 justify-center text-[var(--color-text-muted)]">
