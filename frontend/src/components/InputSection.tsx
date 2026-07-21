@@ -4,56 +4,28 @@ import { processVideoUrl, processVideoFile } from "../lib/api";
 import { useCliprolContext } from "../context/CliprolContext";
 
 const InputSection = () => {
-  const [videoUrl, setVideoUrl] = useState("");
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [mode, setMode] = useState<"url" | "upload">("url");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { setPage, setClips, setError, error, inputMode, setInputMode, videoUrl, setVideoUrl, videoFile, setVideoFile, processing, setProcessing} = useCliprolContext();
 
-  const { setPage, setClips, setError, error } = useCliprolContext();
-
-  const processVideo = async () => {
+  const validateInputAndNavigate = async () => {
     // Validate first before navigating
-    if (mode === "url" && !videoUrl.trim()) {
+    if (inputMode === "url" && !videoUrl.trim()) {
       setError("Please enter a valid YouTube link");
       return {
         /*setPage("results")*/
       }; //REMEMBER TO REMOVE THIS!
-      setIsProcessing(false);
+      setProcessing(false);
     }
 
-    if (mode === "upload" && !videoFile) {
+    if (inputMode === "upload" && !videoFile) {
       setError("Please upload a video file");
       return;
-      setIsProcessing(false);
+      setProcessing(false);
     }
 
     // Only navigate after validation passes
-    setIsProcessing(true);
+    setProcessing(true);
     setPage("processing");
     setError(null);
-
-    try {
-      let response;
-
-      if (mode === "url") {
-        response = await processVideoUrl(videoUrl);
-      } else {
-        if (!videoFile) return;
-        response = await processVideoFile(videoFile);
-      }
-
-      const data = await response.json();
-      setClips(data.clips || []);
-      setIsProcessing(false);
-      setPage("results");
-    } catch (error) {
-      setError(
-        "An error occurred while processing the video. Please try again.",
-      );
-      setPage("landing");
-      console.error("Error processing video:", error);
-      setIsProcessing(false);
-    }
   };
 
   return (
@@ -61,9 +33,9 @@ const InputSection = () => {
       {/* Tabs */}
       <div className="flex items-center justify-center border-b border-[var(--color-border)] mb-6">
         <button
-          onClick={() => setMode("url")}
+          onClick={() => setInputMode("url")}
           className={`px-0 py-3 mr-8 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
-            mode === "url"
+            inputMode === "url"
               ? "border-[var(--color-accent)] text-[var(--color-text)] font-semibold"
               : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
@@ -71,9 +43,9 @@ const InputSection = () => {
           YouTube link
         </button>
         <button
-          onClick={() => setMode("upload")}
+          onClick={() => setInputMode("upload")}
           className={`px-0 py-3 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${
-            mode === "upload"
+            inputMode === "upload"
               ? "border-[var(--color-accent)] text-[var(--color-text)] font-semibold"
               : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
@@ -83,7 +55,7 @@ const InputSection = () => {
       </div>
 
       {/* URL Input */}
-      {mode === "url" && (
+      {inputMode === "url" && (
         <div className="flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-4 py-3 mb-4 focus-within:border-[var(--color-text-muted)] transition-colors duration-150">
           <svg
             width="14"
@@ -108,7 +80,7 @@ const InputSection = () => {
       )}
 
       {/* Upload Zone */}
-      {mode === "upload" && (
+      {inputMode === "upload" && (
         <div className="mb-4 w-full">
           {videoFile ? (
             <div className="border border-[var(--color-border)] rounded-[var(--radius-sm)] p-4 overflow-hidden relative">
@@ -178,11 +150,11 @@ const InputSection = () => {
 
       {/* Submit */}
       <button
-        disabled={isProcessing}
-        onClick={processVideo}
-        className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${isProcessing ? "cursor-wait" : "cursor-pointer"}`}
+        disabled={processing}
+        onClick={validateInputAndNavigate}
+        className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${processing ? "cursor-wait" : "cursor-pointer"}`}
       >
-        {isProcessing ? "Preparing..." : "Create clips"}
+        {processing ? "Preparing..." : "Create clips"}
       </button>
 
       {/* Trust signals 
