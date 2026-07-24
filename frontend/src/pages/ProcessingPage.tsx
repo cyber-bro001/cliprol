@@ -1,83 +1,102 @@
 import { useEffect, useState } from "react";
 import ProcessingState from "../components/ProcessingState";
 import { useCliprolContext } from "../context/CliprolContext";
-
-import {API_BASE_URL} from '../lib/constants';
+import { API_BASE_URL } from "../lib/constants";
 
 const ProcessingPage = () => {
   const [currentStage, setCurrentStage] = useState<number>(0);
-const { videoUrl, videoFile, inputMode, setClips, setPage } = useCliprolContext();
+  const [stages, setStages] = useState<string[]>([]);
 
-useEffect(() => {
-  const processVideo = async () => {
-    try {
-      let url = "";
-      let body: BodyInit;
-      let headers: HeadersInit = {};
+  const { videoUrl, videoFile, inputMode, setClips, setError, setPage } =
+    useCliprolContext();
 
-      if (inputMode === "url") {
-        url = `${import.meta.env.VITE_API_BASE_URL}/process-url`;
-        body = JSON.stringify({ url: videoUrl });
-        headers = { "Content-Type": "application/json" };
-      } else {
-        url = `${import.meta.env.VITE_API_BASE_URL}/upload-video`;
-        const formData = new FormData();
-        formData.append("file", videoFile!);
-        body = formData;
-      }
+  useEffect(() => {
+    const processVideo = async () => {
+      try {
+        let url = "";
+        let body: BodyInit;
+        let headers: HeadersInit = {};
 
-      const response = await fetch(url, { method: "POST", headers, body });
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+        if (inputMode === "url") {
+          url = `${API_BASE_URL}/process-url`;
+          body = JSON.stringify({ url: videoUrl });
+          headers = { "Content-Type": "application/json" };
+        } else {
+          url = `${API_BASE_URL}/upload-video`;
+          const formData = new FormData();
+          formData.append("file", videoFile!);
+          body = formData;
+        }
 
-      if (!reader) return;
+        console.log({
+          inputMode,
+          videoUrl,
+          body,
+        });
 
-      let buffer = "";
+        const response = await fetch(url, { method: "POST", headers, body });
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        if (!response.ok) {
+          throw new Error("Processing failed");
+        }
 
-        buffer += decoder.decode(value, { stream: true });
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
 
-        const blocks = buffer.split("\n\n");
-        buffer = blocks.pop() || "";
+        if (!reader) return;
 
-        for (const block of blocks) {
-          const eventLine = block.split("\n").find(l => l.startsWith("event:"));
-          const dataLine = block.split("\n").find(l => l.startsWith("data:"));
+        let buffer = "";
 
-          if (!eventLine || !dataLine) continue;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-          const event = eventLine.replace("event: ", "").trim();
-          const data = JSON.parse(dataLine.replace("data: ", "").trim());
+          buffer += decoder.decode(value, { stream: true });
 
-          if (event === "progress") {
-            setCurrentStage(prev => prev + 1);
-          }
+          const blocks = buffer.split("\n\n");
+          buffer = blocks.pop() || "";
 
-          if (event === "success") {
-            setClips(data.clips);
-            setPage("results");
-          }
+          for (const block of blocks) {
+            const eventLine = block
+              .split("\n")
+              .find((l) => l.startsWith("event:"));
+            const dataLine = block
+              .split("\n")
+              .find((l) => l.startsWith("data:"));
 
-          if (event === "error") {
-            setPage("landing");
+            if (!eventLine || !dataLine) continue;
+
+            const event = eventLine.replace("event: ", "").trim();
+            const data = JSON.parse(dataLine.replace("data: ", "").trim());
+
+            if (event === "progress") {
+              setStages((prev) => [...prev, data.message]);
+              setCurrentStage((prev) => prev + 1);
+            }
+
+            if (event === "success") {
+              setClips(data.clips);
+              setPage("results");
+            }
+
+            if (event === "error") {
+              setError(data.message);
+              setPage("landing");
+            }
           }
         }
+      } catch (err) {
+        setError("Something went wrong. Please try again.");
+        setPage("landing");
       }
+    };
 
-    } catch (error) {
-      setPage("landing");
-    }
-  };
-
-  processVideo();
-}, []);
+    processVideo();
+  }, []);
 
   return (
-    <div className="">
-      <ProcessingState currentStage={currentStage} />
+    <div>
+      <ProcessingState currentStage={currentStage} stages={stages} />
     </div>
   );
 };

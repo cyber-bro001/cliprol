@@ -14,15 +14,15 @@ type CliprolContextType = {
 
   clips: ClipsType;
   setClips: React.Dispatch<React.SetStateAction<ClipsType>>;
-  
+
   inputMode: "url" | "upload";
   setInputMode: React.Dispatch<React.SetStateAction<"url" | "upload">>;
-  
-  videoUrl: string | nul;
+
+  videoUrl: string | null;
   setVideoUrl: React.Dispatch<React.SetStateAction<string | null>>;
-  
+
   videoFile: File | null;
-  setVideoFile: React.Dispatch<React.SetStateAction<string | null>>;
+  setVideoFile: React.Dispatch<React.SetStateAction<File | null>>;
 };
 
 const CliprolContext = createContext<CliprolContextType | null>(null);
@@ -36,11 +36,11 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clips, setClips] = useState<ClipsType>([]);
-  
+
   const [inputMode, setInputMode] = useState<"url" | "upload">("url");
   const [videoUrl, setVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
- // const [isProcessing, setIsProcessing] = useState(false);
+  // const [isProcessing, setIsProcessing] = useState(false);
 
   return (
     <CliprolContext.Provider

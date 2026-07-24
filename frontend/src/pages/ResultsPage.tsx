@@ -1,20 +1,15 @@
 import ClipCard from "../components/ClipCard";
-import type { ClipsType, PageType } from "../types";
+import { useCliprolContext } from "../context/CliprolContext";
 
-type ResultsPageProps = {
-  clips: ClipsType;
-  setPage: (page: PageType) => void;
-};
+const ResultsPage = () => {
+  const { clips, setPage } = useCliprolContext();
 
-const ResultsPage = ({ clips, setPage }: ResultsPageProps) => {
   return (
     <section className="min-h-screen px-6 py-16">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <header className="text-center">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Cliprol
-          </p>
+          <p className="text-sm text-[var(--color-text-muted)]">Cliprol</p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--color-text)]">
             Your clips are ready.
@@ -39,8 +34,8 @@ const ResultsPage = ({ clips, setPage }: ResultsPageProps) => {
             </h2>
 
             <p className="mt-3 text-[var(--color-text-muted)]">
-              We couldn't find any moments worth clipping from this video.
-              Try another video or adjust your input.
+              We couldn't find any moments worth clipping from this video. Try
+              another video or adjust your input.
             </p>
 
             <button
@@ -57,6 +52,7 @@ const ResultsPage = ({ clips, setPage }: ResultsPageProps) => {
               {clips.map((clip, index) => (
                 <ClipCard
                   key={`${clip.start}-${clip.end}-${index}`}
+                  index={index}
                   clip={clip}
                 />
               ))}
