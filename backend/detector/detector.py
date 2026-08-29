@@ -12,14 +12,14 @@ GEMINI = os.getenv("GEMINI_API_KEY")
 def moment_detection(video_path):
     client = genai.Client(api_key=GEMINI)
 
-    print("1. Client created")
+    #print("1. Client created")
 
     video_file = client.files.upload(file=video_path)
 
-    print("2. upload complete")
+    #print("2. upload complete")
 
     while video_file.state.name == "PROCESSING":
-        print("3. Processing...")
+        #print("3. Processing...")
         time.sleep(5)
         video_file = client.files.get(name=video_file.name)
 
@@ -67,7 +67,7 @@ Format:
 ]
 """
      
-    print("4. Processing finished")
+    #print("4. Processing finished")
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -77,7 +77,7 @@ Format:
         ]
     )
 
-    print("5. Response recieved")
+    #print("5. Response recieved")
 
     #remeber to remove this
     print(f"DEBUG_RESPONSE: {response}")

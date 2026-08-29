@@ -86,13 +86,14 @@ const ProcessingPage = () => {
           }
         }
       } catch (err) {
+        console.error("something went wrong!", err);
         setError("Something went wrong. Please try again.");
         setPage("landing");
       }
     };
 
     processVideo();
-  }, []);
+  }, [videoUrl, videoFile, inputMode, setClips, setError, setPage]);
 
   return (
     <div>

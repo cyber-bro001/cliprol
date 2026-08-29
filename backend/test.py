@@ -1,5 +1,2 @@
-def test():
-    yield 1
-
-
-print(test())
+import socket
+print(socket.getaddrinfo("www.youtube.com", 443))

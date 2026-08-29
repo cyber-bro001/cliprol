@@ -1,16 +1,20 @@
+from logging import DEBUG
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
+from fastapi.sse import ServerSentEvent
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uuid
 import os
 import asyncio
 from dotenv import load_dotenv
+import json
 
 from downloader.downloader import download_video
 from editor.editor import create_clip
 from detector.detector import moment_detection
-from helpers.sse_helper import sse_helper
+from helpers.error_stream_helper import error_stream_generator
 
 load_dotenv()
 
@@ -26,60 +30,79 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class ProcessRequest(BaseModel):
     url: str
 
 
+def serialize_sse_event(event: ServerSentEvent) -> str:
+    """
+    Convert ServerSentEvent to SSE wire format string
+    """
+    lines = []
+    
+    if event.comment:
+        lines.append(f": {event.comment}")
+    
+    if event.event:
+        lines.append(f"event: {event.event}")
+    
+    if event.id:
+        lines.append(f"id: {event.id}")
+    
+    if event.retry:
+        lines.append(f"retry: {event.retry}")
+    
+    if event.data is not None:
+        data_str = json.dumps(event.data)
+        lines.append(f"data: {data_str}")
+    elif event.raw_data:
+        lines.append(f"data: {event.raw_data}")
+    
+    return "\n".join(lines) + "\n\n"
+
+
 async def process_pipeline(video, folder):
     try:
-        loop = asyncio.get_event_loop()
-
-        yield sse_helper("progress", {"message": "Preparing video"})
+        yield ServerSentEvent(event="progress", data={"message": "Preparing video"})
 
         try:
-            moments = await loop.run_in_executor(None, lambda: moment_detection(video))
+            moments = await asyncio.to_thread(moment_detection, video)
         except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-
-            yield sse_helper("error", {"message": str(e)})
-            
-        #except Exception:
-            #yield sse_helper("error", {"message": "Failed to analyze video. Please try again."})
+            error_msg = "Unable to analyze video. This may be due to video format, duration, or content restrictions. Please try a different video."
+            yield ServerSentEvent(event="error", data={"message": error_msg})
             return
 
-        yield sse_helper("progress", {"message": "Analyzing content"})
+        yield ServerSentEvent(event="progress", data={"message": "Analyzing content"})
 
         if not moments:
-            os.remove(video)
-            yield sse_helper("error", {"message": "No moments found. Try a longer video."})
+            if os.path.exists(video):
+                os.remove(video)
+            yield ServerSentEvent(event="error", data={"message": "No interesting moments found in this video. Try uploading a longer video with more varied content."})
             return
 
-        yield sse_helper("progress", {"message": "Finding key moments"})
+        yield ServerSentEvent(event="progress", data={"message": "Finding key moments"})
 
         clips = []
-
-        yield sse_helper("progress", {"message": "Creating clips"})
+        yield ServerSentEvent(event="progress", data={"message": "Creating clips"})
 
         for moment in moments:
             start_time = moment["start"]
             end_time = moment["end"]
 
             try:
-                clip = await loop.run_in_executor(
-                    None,
-                    lambda st=start_time, ed=end_time: create_clip(video, st, ed, folder)
-                )
+                clip = await asyncio.to_thread(create_clip, video, start_time, end_time, folder)
                 clips.append(clip)
-            except Exception:
-                yield sse_helper("error", {"message": "Failed to create clips. Please try again."})
+            except Exception as e:
+                yield ServerSentEvent(event="error", data={"message": "Failed to create clips. This may be a temporary issue. Please try again."})
                 return
 
-        yield sse_helper("progress", {"message": "Finalizing"})
+        yield ServerSentEvent(event="progress", data={"message": "Finalizing"})
 
-        os.remove(video)
+        if os.path.exists(video):
+            os.remove(video)
 
-        yield sse_helper("success", {
+        yield ServerSentEvent(event="success", data={
             "status": "success",
             "moments_detected": len(moments),
             "clips": clips,
@@ -87,9 +110,13 @@ async def process_pipeline(video, folder):
         })
 
     except Exception as e:
-        import traceback
-        print(traceback.format_exc())
-        yield sse_helper("error", {"message": "Something went wrong. Please try again."})
+        yield ServerSentEvent(event="error", data={"message": "An unexpected error occurred. Please try again later."})
+
+
+async def sse_stream_generator(video, folder):
+    """Wrapper that converts async generator to SSE stream"""
+    async for event in process_pipeline(video, folder):
+        yield serialize_sse_event(event)
 
 
 @app.post("/process-url")
@@ -99,23 +126,36 @@ async def process_video(request: ProcessRequest):
         folder = f"{BASE_STORAGE}/{job_id}"
         os.makedirs(folder, exist_ok=True)
 
-        loop = asyncio.get_event_loop()
-
         try:
-            video = await loop.run_in_executor(None, lambda: download_video(request.url, folder))
+            video = await asyncio.to_thread(download_video, request.url, folder)
         except Exception:
-            raise Exception("Failed to download video. Check the URL and try again.")
+            error_msg = "Could not download video. Please check the URL is valid and try again."
+            
+            async def error_stream():
+                async for event in error_stream_generator(error_msg):
+                    yield serialize_sse_event(event)
+            
+            return StreamingResponse(
+                error_stream(),
+                media_type="text/event-stream",
+                headers={"Cache-Control": "no-cache"}
+            )
 
-        print(f"[DEBUG] Video downloaded: {video}")
-
-        return StreamingResponse(process_pipeline(video, folder), media_type="text/event-stream")
+        return StreamingResponse(
+            sse_stream_generator(video, folder),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache"}
+        )
 
     except Exception as e:
-        import traceback
-        print(traceback.format_exc())
+        async def error_stream():
+            async for event in error_stream_generator("An error occurred while processing your request. Please try again."):
+                yield serialize_sse_event(event)
+        
         return StreamingResponse(
-            iter([sse_helper("error", {"message": str(e)})]),
-            media_type="text/event-stream"
+            error_stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache"}
         )
 
 
@@ -133,12 +173,19 @@ async def process_upload(file: UploadFile = File(...)):
         with open(video_path, "wb") as f:
             f.write(contents)
 
-        return StreamingResponse(process_pipeline(video_path, folder), media_type="text/event-stream")
+        return StreamingResponse(
+            sse_stream_generator(video_path, folder),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache"}
+        )
 
     except Exception as e:
-        import traceback
-        print(traceback.format_exc())
+        async def error_stream():
+            async for event in error_stream_generator("Failed to upload file. Please try again."):
+                yield serialize_sse_event(event)
+        
         return StreamingResponse(
-            iter([sse_helper("error", {"message": str(e)})]),
-            media_type="text/event-stream"
+            error_stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache"}
         )

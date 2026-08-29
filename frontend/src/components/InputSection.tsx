@@ -149,11 +149,11 @@ const InputSection = () => {
 
       {/* Submit */}
       <button
-        disabled={processing}
+        disabled={processing && !error}
         onClick={validateInputAndNavigate}
-        className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${processing ? "cursor-wait" : "cursor-pointer"}`}
+        className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white ${processing && !error ? "cursor-wait" : "cursor-pointer"}`}
       >
-        {processing ? "Preparing..." : "Create clips"}
+        {processing && !error ? "Preparing..." : "Create clips"}
       </button>
 
       {/* Trust signals 
