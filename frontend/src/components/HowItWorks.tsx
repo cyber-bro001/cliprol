@@ -49,7 +49,7 @@ const HowItWorks = () => {
           {steps.map((step, index) => (
             <div
               key={step.step}
-              className={`grid gap-10 py-12 lg:grid-cols-2 ${
+              className={`grid gap-10 py-12 md:grid-cols-2 md:[direction:rtl] ${
                 index !== steps.length - 1
                   ? "border-b border-[var(--color-border)]"
                   : ""

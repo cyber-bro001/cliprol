@@ -28,12 +28,6 @@ const ProcessingPage = () => {
           body = formData;
         }
 
-        console.log({
-          inputMode,
-          videoUrl,
-          body,
-        });
-
         const response = await fetch(url, { method: "POST", headers, body });
 
         if (!response.ok) {

@@ -46,7 +46,7 @@ const WhyCliprol = () => {
           {reasons.map((reason, index) => (
             <div
               key={reason.title}
-              className={`grid gap-10 py-12 lg:grid-cols-2 ${
+              className={`grid gap-10 py-12 md:grid-cols-2 ${
                 index !== reasons.length - 1
                   ? "border-b border-[var(--color-border)]"
                   : ""
