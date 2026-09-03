@@ -1,17 +1,28 @@
 //import { processVideoUrl, processVideoFile } from "../lib/api";
-
+import { useNavigate } from "react-router-dom";
 import { useCliprolContext } from "../context/CliprolContext";
 
 const InputSection = () => {
-  const { setPage, setClips, setError, error, inputMode, setInputMode, videoUrl, setVideoUrl, videoFile, setVideoFile, processing, setProcessing} = useCliprolContext();
+  const navigate = useNavigate();
+  const {
+    setClips,
+    setError,
+    error,
+    inputMode,
+    setInputMode,
+    videoUrl,
+    setVideoUrl,
+    videoFile,
+    setVideoFile,
+    processing,
+    setProcessing,
+  } = useCliprolContext();
 
   const validateInputAndNavigate = async () => {
     // Validate first before navigating
     if (inputMode === "url" && !videoUrl.trim()) {
       setError("Please enter a valid YouTube link");
-      return {
-        /*setPage("results")*/
-      }; //REMEMBER TO REMOVE THIS!
+      return;
       setProcessing(false);
     }
 
@@ -23,7 +34,7 @@ const InputSection = () => {
 
     // Only navigate after validation passes
     setProcessing(true);
-    setPage("processing");
+    navigate("/processes");
     setError(null);
   };
 
@@ -156,13 +167,11 @@ const InputSection = () => {
         {processing && !error ? "Preparing..." : "Create clips"}
       </button>
 
-      {/* Trust signals 
       <div className="w-full flex items-center gap-6 mt-4 justify-center text-[var(--color-text-muted)]">
-        <span className="text-xs">No Sign up required</span>
+        <span className="text-xs">No credit card required</span>
         <span className="text-xs">YouTube or upload</span>
         <span className="text-xs">Ready in minutes</span>
       </div>
-      */}
     </section>
   );
 };

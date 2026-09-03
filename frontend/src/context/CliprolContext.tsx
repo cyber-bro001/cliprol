@@ -1,11 +1,8 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-import type { PageType, ClipsType } from "../types";
+import type {ClipsType } from "../types";
 
 type CliprolContextType = {
-  page: PageType;
-  setPage: React.Dispatch<React.SetStateAction<PageType>>;
-
   processing: boolean;
   setProcessing: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -32,7 +29,6 @@ type CliprolProviderProps = {
 };
 
 export const CliprolProvider = ({ children }: CliprolProviderProps) => {
-  const [page, setPage] = useState<PageType>("landing");
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clips, setClips] = useState<ClipsType>([]);
@@ -45,8 +41,6 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
   return (
     <CliprolContext.Provider
       value={{
-        page,
-        setPage,
         processing,
         setProcessing,
         error,

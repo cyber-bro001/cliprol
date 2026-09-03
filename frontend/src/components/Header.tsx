@@ -1,5 +1,6 @@
-import { AlignLeft, AlignRight, X } from "lucide-react";
+import { AlignLeft, X } from "lucide-react";
 import { useState } from "react";
+import {NavLink} from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,27 +47,27 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center space-x-4">
-          <a
-            href="/login"
+          <NavLink
+            to="/login"
             className="text-[var(--color-text-muted)] text-sm hover:text-[var(--color-text)] transition-colors duration-150"
           >
             Login
-          </a>
-          <a
-            href="/signup"
+          </NavLink>
+          <NavLink
+            to="/signup"
             className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] text-[var(--color-text)] px-4 py-2 rounded-[var(--radius-sm)]"
           >
             Try it free
-          </a>
+          </NavLink>
         </div>
 
         <div className="md:hidden">
-          <a
-            href="/signup"
+          <NavLink
+            to="/signup"
             className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)]"
           >
             Try it FREE
-          </a>
+          </NavLink>
         </div>
       </nav>
 
@@ -82,18 +83,18 @@ const Header = () => {
               {link.label}
             </a>
           ))}
-          <a
-            href="/login"
+          <NavLink
+            to="/login"
             className="text-[var(--color-text-muted)] text-sm hover:text-[var(--color-text)] transition-colors duration-150"
           >
             Login
-          </a>
-          <a
-            href="/signup"
+          </NavLink>
+          <NavLink
+            to="/signup"
             className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)] text-center"
           >
             Sign up - It's FREE
-          </a>
+          </NavLink>
         </div>
       )}
     </header>

@@ -1,19 +1,35 @@
+import { Routes, Route, useLocation } from "react-router-dom";
+
 import Header from "./components/Header";
-import { useCliprolContext } from "./context/CliprolContext";
 import LandingPage from "./pages/LandingPage";
 import ProcessingPage from "./pages/ProcessingPage";
 import ResultsPage from "./pages/ResultsPage";
 
+import LoginPage from "./pages/authpage/LoginPage";
+import SignupPage from "./pages/authpage/SignupPage";
+
 const App = () => {
-  const {page} = useCliprolContext();
- 
+  const location = useLocation();
+
+  const hideNavbar =
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/signup");
+
   return (
-    <div>
-      <Header />
-      {page === "landing" && <LandingPage />}
-      {page === "processing" && <ProcessingPage />}
-      {page === "results" && <ResultsPage />}
-    </div>
+    <>
+      {!hideNavbar && <Header />}
+
+      <div>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/processes" element={<ProcessingPage />} />
+          <Route path="/results" element={<ResultsPage />} />
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+        </Routes>
+      </div>
+    </>
   );
 };
 

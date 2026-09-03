@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProcessingState from "../components/ProcessingState";
 import { useCliprolContext } from "../context/CliprolContext";
 import { API_BASE_URL } from "../lib/constants";
@@ -6,8 +7,9 @@ import { API_BASE_URL } from "../lib/constants";
 const ProcessingPage = () => {
   const [currentStage, setCurrentStage] = useState<number>(0);
   const [stages, setStages] = useState<string[]>([]);
+  const navigate = useNavigate();
 
-  const { videoUrl, videoFile, inputMode, setClips, setError, setPage } =
+  const { videoUrl, videoFile, inputMode, setClips, setError } =
     useCliprolContext();
 
   useEffect(() => {
@@ -70,24 +72,24 @@ const ProcessingPage = () => {
 
             if (event === "success") {
               setClips(data.clips);
-              setPage("results");
+              navigate("/results");
             }
 
             if (event === "error") {
               setError(data.message);
-              setPage("landing");
+              navigate("/");
             }
           }
         }
       } catch (err) {
         console.error("something went wrong!", err);
         setError("Something went wrong. Please try again.");
-        setPage("landing");
+        navigate("/");
       }
     };
 
     processVideo();
-  }, [videoUrl, videoFile, inputMode, setClips, setError, setPage]);
+  }, [videoUrl, videoFile, inputMode, setClips, setError, navigate]);
 
   return (
     <div>
