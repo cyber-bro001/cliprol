@@ -38,6 +38,9 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   // const [isProcessing, setIsProcessing] = useState(false);
 
+  //Auth states
+  const []
+
   return (
     <CliprolContext.Provider
       value={{
