@@ -1,4 +1,39 @@
+import { useCliprolContext } from "../../context/CliprolContext";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { userCrediantailsType, loadingStateType } from "../../types";
+
 const SignupPage = () => {
+  const [formData, setFormData] = useState<userCrediantailsType>({
+    email: "",
+    password: "",
+    name: "",
+  });
+  const [loading, setLoading] = useState<loadingStateType["isLoading"]>(false);
+
+  const { signUpWithEmail } = useCliprolContext();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { success, error } = await signUpWithEmail(formData);
+      if (error) {
+        console.error("Error signing up:", error);
+        //REMEBER TO ADD A USER FRIENDLY MESSSAGE HERE! AND A TOAST NOTIFICATION
+      }
+      if (success) {
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Error signing up:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -24,15 +59,36 @@ const SignupPage = () => {
         </div>
 
         {/* Form */}
-        <form className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs text-[var(--color-text-muted)] font-medium tracking-wide uppercase">
+              Full Name
+            </span>
+            <input
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value.trim() })
+              }
+              type="text"
+              placeholder="Peller Jarvis"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
+              required
+            />
+          </label>
+
           <label className="flex flex-col gap-1.5">
             <span className="text-xs text-[var(--color-text-muted)] font-medium tracking-wide uppercase">
               Email
             </span>
             <input
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value.trim() })
+              }
               type="email"
-              placeholder="you@example.com"
+              placeholder="pellerjarvis@example.com"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
+              required
             />
           </label>
 
@@ -41,17 +97,24 @@ const SignupPage = () => {
               Password
             </span>
             <input
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value.trim() })
+              }
               type="password"
               placeholder="••••••••"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
+              required
             />
           </label>
 
           <button
             type="submit"
-            className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-[var(--color-accent)]/40 transition-colors duration-150 mt-2 cursor-pointer"
+            className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-[var(--color-accent)]/40 transition-colors duration-150 mt-2 cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={loading}
           >
-            Create account
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
 

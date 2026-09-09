@@ -1,4 +1,34 @@
+import { useCliprolContext } from "../../context/CliprolContext";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { userCrediantailsType, loadingStateType } from "../../types";
+
 const Login = () => {
+  const { signInWithEmail } = useCliprolContext();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<userCrediantailsType>({ email: "", password: "" });
+  const [loading, setLoading] = useState<loadingStateType["isLoading"]>(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { success, error } = await signInWithEmail(formData);
+      if (error) {
+        console.error("Error signing in:", error);
+        // REMEMBER TO ADD A USER FRIENDLY MESSAGE HERE! AND A TOAST NOTIFICATION
+      }
+      if (success) {
+        navigate("/signup");
+      }
+    } catch (error) {
+      console.error("Error signing in:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -21,15 +51,17 @@ const Login = () => {
         </div>
 
         {/* Form */}
-        <form className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs text-[var(--color-text-muted)] font-medium tracking-wide uppercase">
               Email
             </span>
             <input
               type="email"
-              placeholder="you@example.com"
+              placeholder="pellerjarvis@example.com"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
             />
           </label>
 
@@ -46,14 +78,17 @@ const Login = () => {
               type="password"
               placeholder="••••••••"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value.trim() })}
             />
           </label>
 
           <button
             type="submit"
-            className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-[var(--color-accent)]/40 transition-colors duration-150 mt-2 cursor-pointer"
+            className={`w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] hover:bg-[var(--color-accent)]/40 transition-colors duration-150 mt-2 cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={loading}
           >
-            Sign in
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
