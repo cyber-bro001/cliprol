@@ -1,9 +1,11 @@
 import { AlignLeft, X } from "lucide-react";
 import { useState } from "react";
-import {NavLink} from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { useCliprolContext } from "../context/CliprolContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { session } = useCliprolContext();
 
   const navLinks = [
     { label: "Why Cliprol", href: "#whycliprol" },
@@ -46,29 +48,47 @@ const Header = () => {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center space-x-4">
+        {session ? (
           <NavLink
-            to="/login"
-            className="text-[var(--color-text-muted)] text-sm hover:text-[var(--color-text)] transition-colors duration-150"
+            to="/dashboard"
+            className="hidden md:block text-sm font-semibold hover:text-[var(--color-text)] text-[var(--color-text-muted)] px-4 py-2 rounded-[var(--radius-sm)]"
           >
-            Login
+            Dashboard
           </NavLink>
-          <NavLink
-            to="/signup"
-            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] text-[var(--color-text)] px-4 py-2 rounded-[var(--radius-sm)]"
-          >
-            Try it free
-          </NavLink>
-        </div>
+        ) : (
+          <div className="hidden md:flex items-center space-x-4">
+            <NavLink
+              to="/login"
+              className="text-[var(--color-text-muted)] text-sm hover:text-[var(--color-text)] transition-colors duration-150"
+            >
+              Login
+            </NavLink>
+            <NavLink
+              to="/signup"
+              className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] hover:text-[var(--color-bg)] text-[var(--color-text)] px-4 py-2 rounded-[var(--radius-sm)]"
+            >
+              Try it free
+            </NavLink>
+          </div>
+        )}
 
-        <div className="md:hidden">
+        {session ? (
           <NavLink
-            to="/signup"
-            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)]"
+            to="/dashboard"
+            className="text-sm font-semibold hover:text-[var(--color-text)] text-[var(--color-text-muted)] px-4 py-2 rounded-[var(--radius-sm)] md:hidden"
           >
-            Try it FREE
+            Dashboard
           </NavLink>
-        </div>
+        ) : (
+          <div className="md:hidden">
+            <NavLink
+              to="/signup"
+              className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)]"
+            >
+              Try it FREE
+            </NavLink>
+          </div>
+        )}
       </nav>
 
       {/* Mobile menu — same links, no duplication */}
@@ -83,18 +103,25 @@ const Header = () => {
               {link.label}
             </a>
           ))}
-          <NavLink
-            to="/login"
-            className="text-[var(--color-text-muted)] text-sm hover:text-[var(--color-text)] transition-colors duration-150"
-          >
-            Login
-          </NavLink>
-          <NavLink
-            to="/signup"
-            className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)] text-center"
-          >
-            Sign up - It's FREE
-          </NavLink>
+
+          {session ? (
+            ""
+          ) : (
+            <>
+              <NavLink
+                to="/login"
+                className="text-[var(--color-text-muted)] text-sm hover:text-[var(--color-text)] transition-colors duration-150"
+              >
+                Login
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className="text-sm font-medium bg-[var(--color-accent)] hover:bg-[var(--color-text)] text-[var(--color-bg)] px-4 py-2 rounded-[var(--radius-sm)] text-center"
+              >
+                Sign up - It's FREE
+              </NavLink>
+            </>
+          )}
         </div>
       )}
     </header>

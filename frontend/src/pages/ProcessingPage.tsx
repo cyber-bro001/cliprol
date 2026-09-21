@@ -1,101 +1,60 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ProcessingState from "../components/ProcessingState";
 import { useCliprolContext } from "../context/CliprolContext";
-import { API_BASE_URL } from "../lib/constants";
+import { processVideoFile, processVideoUrl } from "../lib/api";
 
 const ProcessingPage = () => {
-  const [currentStage, setCurrentStage] = useState<number>(0);
+  const [currentStage, setCurrentStage] = useState(0);
   const [stages, setStages] = useState<string[]>([]);
+  const { projectId } = useParams();
   const navigate = useNavigate();
-
-  const { videoUrl, videoFile, inputMode, setClips, setError } =
-    useCliprolContext();
+  const { videoUrl, videoFile, inputMode, setClips, setError, setProcessing, session } = useCliprolContext();
 
   useEffect(() => {
+    if (!projectId) { navigate("/dashboard/new-project", { replace: true }); return; }
+    let cancelled = false;
+
     const processVideo = async () => {
       try {
-        let url = "";
-        let body: BodyInit;
-        let headers: HeadersInit = {};
-
-        if (inputMode === "url") {
-          url = `${API_BASE_URL}/process-url`;
-          body = JSON.stringify({ url: videoUrl });
-          headers = { "Content-Type": "application/json" };
-        } else {
-          url = `${API_BASE_URL}/upload-video`;
-          const formData = new FormData();
-          formData.append("file", videoFile!);
-          body = formData;
-        }
-
-        const response = await fetch(url, { method: "POST", headers, body });
-
-        if (!response.ok) {
-          throw new Error("Processing failed");
-        }
-
+        const response = inputMode === "url"
+          ? await processVideoUrl(videoUrl, projectId, session?.access_token ?? "")
+          : videoFile ? await processVideoFile(videoFile) : null;
+        if (!response?.ok) throw new Error("Processing failed");
         const reader = response.body?.getReader();
+        if (!reader) throw new Error("Processing stream was unavailable");
         const decoder = new TextDecoder();
-
-        if (!reader) return;
-
         let buffer = "";
-
-        while (true) {
+        while (!cancelled) {
           const { done, value } = await reader.read();
           if (done) break;
-
           buffer += decoder.decode(value, { stream: true });
-
           const blocks = buffer.split("\n\n");
           buffer = blocks.pop() || "";
-
           for (const block of blocks) {
-            const eventLine = block
-              .split("\n")
-              .find((l) => l.startsWith("event:"));
-            const dataLine = block
-              .split("\n")
-              .find((l) => l.startsWith("data:"));
-
+            const eventLine = block.split("\n").find((line) => line.startsWith("event:"));
+            const dataLine = block.split("\n").find((line) => line.startsWith("data:"));
             if (!eventLine || !dataLine) continue;
-
             const event = eventLine.replace("event: ", "").trim();
             const data = JSON.parse(dataLine.replace("data: ", "").trim());
-
-            if (event === "progress") {
-              setStages((prev) => [...prev, data.message]);
-              setCurrentStage((prev) => prev + 1);
-            }
-
-            if (event === "success") {
-              setClips(data.clips);
-              navigate("/results");
-            }
-
-            if (event === "error") {
-              setError(data.message);
-              navigate("/");
-            }
+            if (event === "progress") { setStages((previous) => [...previous, data.message]); setCurrentStage((previous) => previous + 1); }
+            if (event === "success") { setClips(data.clips); setProcessing(false); navigate(`/dashboard/projects/${projectId}`, { replace: true }); return; }
+            if (event === "error") throw new Error(data.message);
           }
         }
-      } catch (err) {
-        console.error("something went wrong!", err);
-        setError("Something went wrong. Please try again.");
-        navigate("/");
+      } catch (error) {
+        if (!cancelled) {
+          setProcessing(false);
+          setError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+          navigate("/dashboard/new-project", { replace: true });
+        }
       }
     };
-
     processVideo();
-  }, [videoUrl, videoFile, inputMode, setClips, setError, navigate]);
+    return () => { cancelled = true; };
+  }, [inputMode, navigate, projectId, session?.access_token, setClips, setError, setProcessing, videoFile, videoUrl]);
 
-  return (
-    <div>
-      <ProcessingState currentStage={currentStage} stages={stages} />
-    </div>
-  );
+  return <ProcessingState currentStage={currentStage} stages={stages} />;
 };
 
 export default ProcessingPage;

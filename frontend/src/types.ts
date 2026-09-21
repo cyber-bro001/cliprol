@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
 
 export type ClipType = {
   video: string;
@@ -26,14 +27,18 @@ export type CliprolContextType = {
   inputMode: "url" | "upload";
   setInputMode: React.Dispatch<React.SetStateAction<"url" | "upload">>;
 
-  videoUrl: string | null;
-  setVideoUrl: React.Dispatch<React.SetStateAction<string | null>>;
+  videoUrl: string;
+  setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
 
   videoFile: File | null;
   setVideoFile: React.Dispatch<React.SetStateAction<File | null>>;
 
-  session: any | null;
-  setSession: React.Dispatch<React.SetStateAction<any | null>>;
+  session: Session | null;
+  setSession: React.Dispatch<React.SetStateAction<Session | null>>;
+
+  signUpWithEmail: (credentials: userCrediantailsType) => Promise<AuthResult>;
+  signInWithEmail: (credentials: userCrediantailsType) => Promise<AuthResult>;
+  signOut: () => Promise<AuthResult>;
 };
 
 export type userCrediantailsType = {
@@ -45,4 +50,10 @@ export type userCrediantailsType = {
 export type loadingStateType = {
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export type AuthResult = {
+  success: boolean;
+  data?: unknown;
+  error?: unknown;
 };

@@ -7,24 +7,24 @@ type ProcessingStateProps = {
 
 const ProcessingState = ({ currentStage, stages }: ProcessingStateProps) => {
   return (
-    <section className="min-h-screen flex items-center justify-center px-6">
+    <section className="flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-8 sm:px-6">
       <div className="w-full max-w-md">
         <div className="text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)]">
             Cliprol
           </h1>
-          <p className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text)]">
+          <p className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-[var(--color-text)] sm:text-3xl">
             Finding the moments worth posting.
           </p>
         </div>
 
-        <div className="mt-14 space-y-6">
+        <div className="mt-10 space-y-4 sm:mt-14 sm:space-y-6">
           {stages.map((stage, index) => {
             const completed = index < currentStage;
             const active = index === currentStage - 1;
 
             return (
-              <div key={stage} className="flex items-center gap-4">
+              <div key={`${stage}-${index}`} className="flex items-start gap-3 sm:items-center sm:gap-4">
                 {completed ? (
                   <CircleCheck
                     size={22}
@@ -41,7 +41,7 @@ const ProcessingState = ({ currentStage, stages }: ProcessingStateProps) => {
                   />
                 )}
                 <span
-                  className={`text-base font-medium transition-colors duration-300 ${
+                  className={`min-w-0 text-sm font-medium leading-6 transition-colors duration-300 sm:text-base ${
                     active
                       ? "text-[var(--color-text)]"
                       : completed
@@ -56,7 +56,7 @@ const ProcessingState = ({ currentStage, stages }: ProcessingStateProps) => {
           })}
         </div>
 
-        <p className="mt-14 text-center text-sm text-[var(--color-text-muted)]">
+        <p className="mt-10 text-center text-sm text-[var(--color-text-muted)] sm:mt-14">
           This usually takes less than a minute.
         </p>
       </div>

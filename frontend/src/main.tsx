@@ -1,6 +1,7 @@
 //import { StrictMode } from "react";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { createRoot } from "react-dom/client";
-import {BrowserRouter as Router} from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
 import { CliprolProvider } from "./context/CliprolContext.tsx";
@@ -8,9 +9,11 @@ import { CliprolProvider } from "./context/CliprolContext.tsx";
 //<StrictMode>
 
 createRoot(document.getElementById("root")!).render(
-    <Router>
-      <CliprolProvider>
+  <Router>
+    <CliprolProvider>
+      <ErrorBoundary>
         <App />
-      </CliprolProvider>
-    </Router>
+      </ErrorBoundary>
+    </CliprolProvider>
+  </Router>,
 );

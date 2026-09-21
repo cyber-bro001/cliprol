@@ -2,32 +2,25 @@ import { useCliprolContext } from "../../context/CliprolContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { userCrediantailsType, loadingStateType } from "../../types";
+import { createHandleSubmit } from "../../lib/authHelpers/handleSubmit";
+import type { FormErrors } from "../../lib/authHelpers/validateForm";
 
 const Login = () => {
   const { signInWithEmail } = useCliprolContext();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<userCrediantailsType>({ email: "", password: "" });
   const [loading, setLoading] = useState<loadingStateType["isLoading"]>(false);
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { success, error } = await signInWithEmail(formData);
-      if (error) {
-        console.error("Error signing in:", error);
-        // REMEMBER TO ADD A USER FRIENDLY MESSAGE HERE! AND A TOAST NOTIFICATION
-      }
-      if (success) {
-        navigate("/signup");
-      }
-    } catch (error) {
-      console.error("Error signing in:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSubmit = createHandleSubmit({
+    formData,
+    submit: signInWithEmail,
+    setLoading,
+    setFieldErrors,
+    setSubmitError,
+    onSuccess: () => navigate("/dashboard/new-project"),
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
@@ -61,8 +54,9 @@ const Login = () => {
               placeholder="pellerjarvis@example.com"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
+            {fieldErrors.email && <span className="text-xs text-red-400">{fieldErrors.email}</span>}
           </label>
 
           <label className="flex flex-col gap-1.5">
@@ -79,9 +73,12 @@ const Login = () => {
               placeholder="••••••••"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value.trim() })}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
+            {fieldErrors.password && <span className="text-xs text-red-400">{fieldErrors.password}</span>}
           </label>
+
+          {submitError && <p role="alert" className="text-xs text-red-400">{submitError}</p>}
 
           <button
             type="submit"

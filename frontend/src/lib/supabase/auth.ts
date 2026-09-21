@@ -1,12 +1,12 @@
 import { supabase } from "./supabaseClient";
-import type { userCrediantailsType } from "../../types";
+import type { AuthResult, userCrediantailsType } from "../../types";
 
 //SIGNUP WITH EMAIL, PASSWORD, AND NAME
 export const signUpWithEmail = async ({
   email,
   password,
   name,
-}: userCrediantailsType) => {
+}: userCrediantailsType): Promise<AuthResult> => {
   try {
     const { data, error } = await supabase.auth.signUp({
       email: email,
@@ -18,10 +18,7 @@ export const signUpWithEmail = async ({
       },
     });
     if (error) {
-      throw error;
       return { success: false, error };
-
-      //REMEBER TO ADD A USER FRIENDLY MESSSAGE HERE!
     }
     return { success: true, data };
   } catch (error) {
@@ -34,16 +31,14 @@ export const signUpWithEmail = async ({
 export const signInWithEmail = async ({
   email,
   password,
-}: userCrediantailsType) => {
+}: userCrediantailsType): Promise<AuthResult> => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
     if (error) {
-      throw error;
       return { success: false, error };
-      //REMEBER TP ADD A USER FRIENDLY MESSSAGE HERE!
     }
     return { success: true, data };
   } catch (error) {
@@ -53,12 +48,10 @@ export const signInWithEmail = async ({
 };
 
 //SIGNOUT
-export const signOut = async () => {
+export const signOut = async (): Promise<AuthResult> => {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    throw error;
     return { success: false, error };
-    //REMEBER TP ADD A USER FRIENDLY MESSSAGE HERE!
   }
   return { success: true };
 };

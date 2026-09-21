@@ -1,7 +1,9 @@
 import { useCliprolContext } from "../../context/CliprolContext";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { userCrediantailsType, loadingStateType } from "../../types";
+import { createHandleSubmit } from "../../lib/authHelpers/handleSubmit";
+import type { FormErrors } from "../../lib/authHelpers/validateForm";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState<userCrediantailsType>({
@@ -10,29 +12,20 @@ const SignupPage = () => {
     name: "",
   });
   const [loading, setLoading] = useState<loadingStateType["isLoading"]>(false);
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { signUpWithEmail } = useCliprolContext();
   const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { success, error } = await signUpWithEmail(formData);
-      if (error) {
-        console.error("Error signing up:", error);
-        //REMEBER TO ADD A USER FRIENDLY MESSSAGE HERE! AND A TOAST NOTIFICATION
-      }
-      if (success) {
-        navigate("/login");
-      }
-    } catch (error) {
-      console.error("Error signing up:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSubmit = createHandleSubmit({
+    formData,
+    requireName: true,
+    submit: signUpWithEmail,
+    setLoading,
+    setFieldErrors,
+    setSubmitError,
+    onSuccess: () => navigate("/dashboard/new-project"),
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
@@ -67,13 +60,14 @@ const SignupPage = () => {
             <input
               value={formData.name}
               onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value.trim() })
+                setFormData({ ...formData, name: e.target.value })
               }
               type="text"
               placeholder="Peller Jarvis"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
               required
             />
+            {fieldErrors.name && <span className="text-xs text-red-400">{fieldErrors.name}</span>}
           </label>
 
           <label className="flex flex-col gap-1.5">
@@ -83,13 +77,14 @@ const SignupPage = () => {
             <input
               value={formData.email}
               onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value.trim() })
+                setFormData({ ...formData, email: e.target.value })
               }
               type="email"
               placeholder="pellerjarvis@example.com"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
               required
             />
+            {fieldErrors.email && <span className="text-xs text-red-400">{fieldErrors.email}</span>}
           </label>
 
           <label className="flex flex-col gap-1.5">
@@ -99,14 +94,17 @@ const SignupPage = () => {
             <input
               value={formData.password}
               onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value.trim() })
+                setFormData({ ...formData, password: e.target.value })
               }
               type="password"
               placeholder="••••••••"
               className="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-[var(--radius-sm)] outline-none placeholder:text-[var(--color-text-dim)] focus:border-[var(--color-text-muted)] transition-colors duration-150"
               required
             />
+            {fieldErrors.password && <span className="text-xs text-red-400">{fieldErrors.password}</span>}
           </label>
+
+          {submitError && <p role="alert" className="text-xs text-red-400">{submitError}</p>}
 
           <button
             type="submit"
@@ -151,9 +149,9 @@ const SignupPage = () => {
         {/* Login link */}
         <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
           Already have an account?{" "}
-          <a href="/login" className="text-[var(--color-text)] hover:underline">
+          <Link to="/login" className="text-[var(--color-text)] hover:underline">
             Sign in
-          </a>
+          </Link>
         </p>
 
         {/* Terms */}

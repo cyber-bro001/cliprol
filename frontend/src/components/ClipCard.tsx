@@ -7,7 +7,7 @@ type ClipCardProps = {
 
 const ClipCard = ({ clip, index }: ClipCardProps) => {
   return (
-    <article className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <article className="min-w-0 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)]">
       {/* Video */}
       <video
         src={clip.video}
@@ -17,7 +17,7 @@ const ClipCard = ({ clip, index }: ClipCardProps) => {
       />
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Clip Number */}
         <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-dim)]">
           Clip {index}
@@ -34,17 +34,17 @@ const ClipCard = ({ clip, index }: ClipCardProps) => {
             Why this clip
           </p>
 
-          <p className="mt-2 leading-7 text-[var(--color-text)]">
+          <p className="mt-2 break-words leading-7 text-[var(--color-text)]">
             {clip.reason}
           </p>
         </div>
 
         {/* Action */}
-        <div className="mt-8 flex justify-end">
+        <div className="mt-6 flex sm:mt-8 sm:justify-end">
           <a
             href={clip.video}
             download
-            className="rounded-[var(--radius-sm)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-surface2)]"
+            className="w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] px-4 py-2 text-center text-sm font-medium text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-surface2)] sm:w-auto"
           >
             Download
           </a>
