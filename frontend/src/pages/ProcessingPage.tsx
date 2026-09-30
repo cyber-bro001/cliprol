@@ -10,6 +10,8 @@ const ProcessingPage = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { videoUrl, videoFile, inputMode, setClips, setError, setProcessing, session } = useCliprolContext();
+  // Token renewal must not submit a second processing request mid-stream.
+  const [accessToken] = useState(session?.access_token ?? "");
 
   useEffect(() => {
     if (!projectId) { navigate("/dashboard/new-project", { replace: true }); return; }
@@ -18,8 +20,8 @@ const ProcessingPage = () => {
     const processVideo = async () => {
       try {
         const response = inputMode === "url"
-          ? await processVideoUrl(videoUrl, projectId, session?.access_token ?? "")
-          : videoFile ? await processVideoFile(videoFile) : null;
+          ? await processVideoUrl(videoUrl, projectId, accessToken)
+          : videoFile ? await processVideoFile(videoFile, projectId, accessToken) : null;
         if (!response?.ok) throw new Error("Processing failed");
         const reader = response.body?.getReader();
         if (!reader) throw new Error("Processing stream was unavailable");
@@ -39,9 +41,10 @@ const ProcessingPage = () => {
             const data = JSON.parse(dataLine.replace("data: ", "").trim());
             if (event === "progress") { setStages((previous) => [...previous, data.message]); setCurrentStage((previous) => previous + 1); }
             if (event === "success") { setClips(data.clips); setProcessing(false); navigate(`/dashboard/projects/${projectId}`, { replace: true }); return; }
-            if (event === "error") throw new Error(data.message);
+            if (event === "error") throw new Error(data.message + (data.cleanupError ? ` ${data.cleanupError}` : ""));
           }
         }
+        if (!cancelled) throw new Error("The processing connection ended before completion was confirmed. Check Projects before starting a new project.");
       } catch (error) {
         if (!cancelled) {
           setProcessing(false);
@@ -52,7 +55,7 @@ const ProcessingPage = () => {
     };
     processVideo();
     return () => { cancelled = true; };
-  }, [inputMode, navigate, projectId, session?.access_token, setClips, setError, setProcessing, videoFile, videoUrl]);
+  }, [inputMode, navigate, projectId, accessToken, setClips, setError, setProcessing, videoFile, videoUrl]);
 
   return <ProcessingState currentStage={currentStage} stages={stages} />;
 };

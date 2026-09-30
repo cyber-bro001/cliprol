@@ -26,11 +26,15 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
 
   //Auth states
   const [session, setSession] = useState<CliprolContextType["session"]>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setAuthLoading(false);
+    }).catch(() => {
+      setAuthLoading(false);
     });
 
     // Listen for auth state changes
@@ -38,6 +42,7 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setAuthLoading(false);
     });
 
     return () => {
@@ -61,6 +66,7 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
         videoFile,
         setVideoFile,
         session,
+        authLoading,
         setSession,
         signUpWithEmail,
         signInWithEmail,

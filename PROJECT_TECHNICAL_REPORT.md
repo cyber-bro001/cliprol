@@ -99,7 +99,7 @@ It uses Gemini to look at the video and return moments like:
 
 - start time
 - end time
-- why this moment is interesting
+- why this moment is interesting4
 
 #### `backend/downloader/downloader.py`
 This file downloads the video from a URL.
@@ -417,9 +417,8 @@ This project already has these core pieces:
 - clip display page
 - Supabase integration for storage and auth
 
-So the core MVP is present and functional.
+So the core MVP is present and functionality
 
----
 
 ## 13. What is still incomplete or limited
 

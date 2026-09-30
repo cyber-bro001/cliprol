@@ -38,4 +38,4 @@ def download_video(url, folder):
     
        os.remove(input_file)
     
-       return output_file
+       return output_file, info.get("title")

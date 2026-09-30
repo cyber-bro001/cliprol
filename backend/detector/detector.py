@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from moviepy import VideoFileClip
 import asyncio
+from services.blocking import run_blocking
 
 load_dotenv()
 
@@ -29,13 +30,13 @@ async def detect_moments_with_progress(video_path):
     finally:
         src.close()
 
-    video_file = await asyncio.to_thread(client.files.upload, file=video_path)
+    video_file = await run_blocking(client.files.upload, file=video_path)
 
     yield ("progress", "Analyzing video content...")
 
     while video_file.state.name == "PROCESSING":
         await asyncio.sleep(5)
-        video_file = await asyncio.to_thread(client.files.get, name=video_file.name)
+        video_file = await run_blocking(client.files.get, name=video_file.name)
 
 
     prompt = f"""
@@ -85,7 +86,7 @@ Format:
 
     yield ("progress", "Generating the best moments")
 
-    response = await asyncio.to_thread(
+    response = await run_blocking(
         client.models.generate_content,
         model="gemini-2.5-flash",
         contents=[

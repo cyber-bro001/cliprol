@@ -1,6 +1,7 @@
 """HTTP/SSE representation for processing events."""
 
 import json
+from contextlib import aclosing
 from collections.abc import AsyncIterator
 
 from fastapi.sse import ServerSentEvent
@@ -31,5 +32,6 @@ def serialize_sse_event(event: ServerSentEvent) -> str:
 
 async def stream_sse_events(events: AsyncIterator[ProcessingEvent]) -> AsyncIterator[str]:
     """Turn service-level events into serialized SSE messages."""
-    async for event_name, data in events:
-        yield serialize_sse_event(ServerSentEvent(event=event_name, data=data))
+    async with aclosing(events):
+        async for event_name, data in events:
+            yield serialize_sse_event(ServerSentEvent(event=event_name, data=data))

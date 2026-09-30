@@ -1,5 +1,5 @@
 from moviepy import VideoFileClip
-import os
+import math
 
 
 def create_clip(video_path, start_time, end_time, folder):
@@ -17,31 +17,30 @@ def create_clip(video_path, start_time, end_time, folder):
         folder: Output folder
 
     Returns:
-        Path to the created clip, or None if the range is invalid
+        (path, actual_start, actual_end), or None if the range is invalid.
+        Boundaries are whole seconds to match the existing clips table.
     """
 
     video = VideoFileClip(video_path)
-    duration = video.duration
-
-    safe_start = max(0.0, float(start_time))
-    safe_end = min(duration, float(end_time))
-
-    if safe_end <= safe_start or safe_start >= duration:
-        video.close()
-        return None
-
-    clip = video.subclipped(safe_start, safe_end)
-
-    output = f"{folder}/clip_{int(safe_start)}.mp4"
-
+    clip = None
     try:
+        duration = video.duration
+        safe_start = math.ceil(max(0.0, float(start_time)))
+        safe_end = math.floor(min(duration, float(end_time)))
+        if safe_end <= safe_start or safe_start >= duration:
+            return None
+        clip = video.subclipped(safe_start, safe_end)
+        output = f"{folder}/clip_{int(safe_start)}.mp4"
         clip.write_videofile(
             output,
             codec="libx264",
             audio_codec="aac"
         )
     finally:
-        video.close()
-        clip.close()
+        try:
+            if clip is not None:
+                clip.close()
+        finally:
+            video.close()
 
-    return output
+    return output, safe_start, safe_end

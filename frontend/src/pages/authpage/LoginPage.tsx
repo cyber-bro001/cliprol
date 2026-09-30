@@ -1,6 +1,7 @@
 import { useCliprolContext } from "../../context/CliprolContext";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { loginDestination } from "../../lib/authHelpers/destination";
 import type { userCrediantailsType, loadingStateType } from "../../types";
 import { createHandleSubmit } from "../../lib/authHelpers/handleSubmit";
 import type { FormErrors } from "../../lib/authHelpers/validateForm";
@@ -8,6 +9,7 @@ import type { FormErrors } from "../../lib/authHelpers/validateForm";
 const Login = () => {
   const { signInWithEmail } = useCliprolContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState<userCrediantailsType>({ email: "", password: "" });
   const [loading, setLoading] = useState<loadingStateType["isLoading"]>(false);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -19,7 +21,7 @@ const Login = () => {
     setLoading,
     setFieldErrors,
     setSubmitError,
-    onSuccess: () => navigate("/dashboard/new-project"),
+    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl")), { replace: true }),
   });
 
   return (
@@ -110,9 +112,9 @@ const Login = () => {
         {/* Sign up link */}
         <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
           Don't have an account?{" "}
-          <a href="/signup" className="text-[var(--color-text)] hover:underline">
+          <Link to="/signup" state={location.state} className="text-[var(--color-text)] hover:underline">
             Sign up
-          </a>
+          </Link>
         </p>
 
       </div>

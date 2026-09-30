@@ -1,6 +1,7 @@
 import { useCliprolContext } from "../../context/CliprolContext";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { loginDestination } from "../../lib/authHelpers/destination";
 import type { userCrediantailsType, loadingStateType } from "../../types";
 import { createHandleSubmit } from "../../lib/authHelpers/handleSubmit";
 import type { FormErrors } from "../../lib/authHelpers/validateForm";
@@ -17,6 +18,7 @@ const SignupPage = () => {
 
   const { signUpWithEmail } = useCliprolContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const handleSubmit = createHandleSubmit({
     formData,
     requireName: true,
@@ -24,7 +26,7 @@ const SignupPage = () => {
     setLoading,
     setFieldErrors,
     setSubmitError,
-    onSuccess: () => navigate("/dashboard/new-project"),
+    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl")), { replace: true }),
   });
 
   return (
@@ -149,7 +151,7 @@ const SignupPage = () => {
         {/* Login link */}
         <p className="text-center text-xs text-[var(--color-text-muted)] mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-[var(--color-text)] hover:underline">
+          <Link to="/login" state={location.state} className="text-[var(--color-text)] hover:underline">
             Sign in
           </Link>
         </p>

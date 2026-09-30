@@ -16,7 +16,7 @@ const NewProject = () => {
       throw new Error("Please upload a video.");
     }
     setError(null);
-    const project = await createProject({ title: inputMode === "url" ? videoUrl : videoFile?.name || "Untitled project", inputType: inputMode, inputUrl: inputMode === "url" ? videoUrl : undefined });
+    const project = await createProject({ title: inputMode === "url" ? "Untitled project" : videoFile?.name || "Untitled project", inputType: inputMode, inputUrl: inputMode === "url" ? videoUrl : undefined });
     sessionStorage.removeItem("cliprol.pendingVideoUrl");
     navigate(`/dashboard/process/${project.id}`);
   };
