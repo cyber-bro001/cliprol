@@ -1,83 +1,30 @@
-import PreviewFrame from "./PreviewFrame";
+import { Pause, Play } from "lucide-react";
+import type { CSSProperties } from "react";
+import ScenarioMedia from "./landing/ScenarioMedia";
+import { momentExamples } from "./landing/momentExamples";
+import { rotationTransition, useClipRotation } from "./landing/useClipRotation";
 
-const HowItWorks = () => {
-  const steps = [
-    {
-      step: "01",
-      title: "Upload a video",
-      description:
-        "Paste a YouTube link or upload a video directly from your device.",
-      preview: "Landing Preview",
-    },
-    {
-      step: "02",
-      title: "Cliprol gets to work",
-      description:
-        "Your video is processed and the moments worth keeping are identified automatically.",
-      preview: "Processing Preview",
-    },
-    {
-      step: "03",
-      title: "Review and download",
-      description:
-        "Preview each clip, decide which ones to keep, and download them individually.",
-      preview: "Results Preview",
-    },
-  ];
-
+export default function HowItWorks() {
+  const { sectionRef, step, paused, setPaused, running, reduced } = useClipRotation(momentExamples.length);
   return (
-    <section id="howitworks" className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
-        {/* Heading */}
-        <div className="max-w-2xl">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            How it works
-          </p>
-
-          <h2 className="mt-3 text-3xl font-semibold leading-tight text-[var(--color-text)] md:text-4xl">
-            Three simple steps.
-          </h2>
-
-          <p className="mt-5 leading-8 text-[var(--color-text-muted)]">
-            No complicated workflow. Upload your video, let Cliprol process it,
-            then download the clips you want to share.
-          </p>
-        </div>
-
-        {/* Steps */}
-        <div className="mt-20">
-          {steps.map((step, index) => (
-            <div
-              key={step.step}
-              className={`grid gap-10 py-12 md:grid-cols-2 md:[direction:rtl] ${
-                index !== steps.length - 1
-                  ? "border-b border-[var(--color-border)]"
-                  : ""
-              }`}
-            >
-              {/* Text */}
-              <div className="flex flex-col justify-center">
-                <p className="text-sm tracking-[0.2em] uppercase text-[var(--color-text-dim)]">
-                  Step {step.step}
-                </p>
-
-                <h3 className="mt-3 text-2xl font-medium text-[var(--color-text)]">
-                  {step.title}
-                </h3>
-
-                <p className="mt-5 leading-8 text-[var(--color-text-muted)]">
-                  {step.description}
-                </p>
-              </div>
-
-              {/* Preview */}
-              <PreviewFrame title={step.preview} />
-            </div>
-          ))}
-        </div>
+    <section ref={sectionRef} id="ready-to-share" className="ready-section page-width" aria-labelledby="ready-heading">
+      <h2 id="ready-heading">Your content, ready to share.</h2>
+      <div className="ready-stage" data-running={running} data-reduced={reduced} data-transitioning={step.transitioning}
+        style={{ "--rotation-duration": `${rotationTransition}ms` } as CSSProperties}>
+        {momentExamples.map((example, index) => {
+          const position = (index - step.index + momentExamples.length) % momentExamples.length;
+          return <figure key={example.id} className="ready-viewer" data-position={position}
+            aria-label={`${example.media.description}. ${position === 0 ? "Center clip" : "Side clip"}`}>
+            <div className="ready-phone-chrome" aria-hidden="true"><span /></div>
+            <div className="ready-clip"><ScenarioMedia media={example.media} /></div>
+            <div className="ready-phone-base" aria-hidden="true"><span /></div>
+          </figure>;
+        })}
       </div>
+      {!reduced && <button type="button" className="moment-pause ready-pause" onClick={() => setPaused(value => !value)}
+        aria-label={paused ? "Resume ready-to-share rotation" : "Pause ready-to-share rotation"}>
+        {paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
+      </button>}
     </section>
   );
-};
-
-export default HowItWorks;
+}

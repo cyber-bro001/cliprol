@@ -2,6 +2,10 @@
 
 This is a simple guide for anyone starting on this project. The goal is to help a new developer understand what the app does, how it works, and where to start.
 
+Product direction is defined in [Cliprol_Product_Vision.md](Cliprol_Product_Vision.md), revised 2026-10-06. Cliprol is a creator-facing content repurposing platform, with intelligent clipping as its current core capability. Broader formatting and distribution capabilities are direction, not implemented features.
+
+Checkout audit (2026-10-06): the media milestone records historical test results, but its referenced tests, verification script, and migration are absent from this checkout. No landing/input test files or test script were found; Vitest, Testing Library, and jsdom are declared dependencies. Historical verification is not proof of this checkout's deployment state.
+
 ## 1. What this project is
 
 Cliprol is a web app that takes a long video and finds the best short moments in it.
@@ -15,7 +19,7 @@ Example flow:
 5. The clips are stored in cloud storage.
 6. The frontend shows the clips to the user.
 
-In simple terms: this project is an AI-powered video clipping tool.
+The current implementation focuses on intelligent clipping within the broader content repurposing direction.
 
 ---
 
@@ -424,11 +428,11 @@ So the core MVP is present and functionality
 
 This project is not fully production-ready yet. A few things are intentionally simplified or left unfinished.
 
-### 1) Upload processing is not fully implemented
-The upload endpoint exists, but it does not fully support real project-backed uploads yet.
+### 1) Upload authentication handoff needs attention
+Project-backed upload processing exists in `/upload-video`. The selected file stays in React context and is lost on reload. Landing URL submissions persist a pending URL and resume at New Project after login; upload submissions do not record equivalent navigation intent, so login normally falls back to Projects. A focused handoff fix should accompany later input work.
 
-### 2) Projects page is mostly a placeholder
-`DashboardProjects.tsx` has an empty state and does not load real projects yet.
+### 2) Project history depends on deployed media infrastructure
+`DashboardProjects.tsx` loads completed projects, thumbnail access, and deletion controls. Deployment requirements and historical verification are described in `PROJECT_MEDIA_MILESTONE.md`; referenced migration/checker artifacts are missing here.
 
 ### 3) Only YouTube links are supported for now
 The platform validation currently only recognizes YouTube.
@@ -581,7 +585,7 @@ Once you understand this model, the code becomes much easier to follow.
 
 ## 20. Final summary
 
-Cliprol is a small but meaningful AI video clipping app.
+Cliprol is a content repurposing platform for creators whose current core implementation is intelligent clipping.
 
 It takes a long video, finds the exciting moments, cuts them into short clips, and presents them to the user.
 
@@ -600,3 +604,129 @@ If you are starting fresh, do not try to understand every line at once. First un
 User input -> project creation -> backend processing -> AI analysis -> clip generation -> result page
 
 That is the heart of the app.
+
+## 21. Hero implementation (2026-10-09)
+
+The approved scope is Header + Hero + functional input + HeroTransformation. Lower-page composition is deferred; existing lower components were not redesigned or restored in this pass. Existing auth, project creation, processing, dashboard, persisted results, and backend files were not changed in this pass. Earlier working-tree changes are separate from this hero iteration.
+
+### Component ownership
+
+- App retains route/header ownership. Header uses the independently replaceable temporary LogoMark, How it works / Use cases / FAQ anchors, session-aware Sign in / Dashboard, and Get started.
+- LandingPage composes Hero, the real InputSection, and HeroTransformation inside the same hero section. It does not own animation or processing state.
+- Hero uses the approved headline/subhead with neutral typography and no marketing eyebrow.
+- InputSection retains existing shared validation, URL/upload selection, navigation, and onProcess delegation. This pass refines its existing CSS without changing its behavior or authentication helpers.
+- HeroTransformation owns the unframed spatial demonstration. It has automatic cycling and one pause/resume control, with no visible scenario selector, stage headings, caption grid, or capability note. A screen-reader description explains the visual example without repeated live announcements.
+- SourcePreview retains one source image element per scenario through every phase; its transform changes the source into the landscape result. It owns the attached MomentTimeline.
+- MomentTimeline displays two illustrative normalized moment positions. No invented source duration, timestamps, percentage progress, or actual-analysis claims are rendered.
+- OutputFan renders only the two portrait images, each linked to a moment ID. It does not duplicate the landscape source.
+- ScenarioMedia owns intrinsic dimensions, loading priority, accessible descriptions, and a truthful unavailable-image fallback. The supplied assets are stills, so no marketing video playback controls are created.
+- useHeroSequence owns phases, remaining-time pause/resume, viewport/tab visibility, reduced motion, and media preparation. CSS handles transforms/opacity; React is not updated every frame.
+- heroScenarios.ts contains exactly Gaming, Podcast, and Coaching in that order. Each has one original and two portrait clips. game-clip3.png remains unused by owner instruction; game-original.png retains its baked-in player controls by owner instruction.
+
+### Timing and rendering
+
+| Time | Phase |
+| --- | --- |
+| 0?0.3 s | Source settles immediately |
+| 0.3?1.0 s | Two timeline markers appear sequentially |
+| 1.0?2.4 s | Portraits emerge; persistent source moves to landscape-result position |
+| 2.4?5.4 s | Completed result holds |
+| 5.4?6.1 s | Composition exits, then the next source enters |
+
+The loop is 6.1 seconds per scenario. CSS event timing comes from heroTiming, derived from the same phase durations as the hook. Pause/visibility changes preserve remaining phase time and pause CSS animations. Images are prepared before timing starts; image failure permits a fallback rather than stalling the cycle. The next scenario is prepared during the result hold, rather than loading all nine images on entry.
+
+Desktop places portraits around the landscape source. Tablet adjusts sizes/travel. Mobile places the persistent landscape above the two portraits and uses matching origin positions. Reduced motion renders the full result, retains a static moment timeline, and disables cycling and the unnecessary pause control. Stage dimensions reserve space throughout the loop.
+
+### Media
+
+Supplied PNGs remain untouched in frontend/src/assets/reference. Nine WebP derivatives preserve the full dimensions and framing under frontend/public/media/landing/{gaming,podcast,coaching}/{source,clip-1,clip-2}.webp. Total derivative size is 883,680 bytes, versus 17,458,197 bytes for the nine selected originals. The Opus screen recording and unused game-clip3.png are not imported or served as marketing assets. Replacement mapping/dimensions are documented in frontend/public/media/landing/README.md.
+
+### Validation actually executed
+
+- 24 focused tests passed across four test files: input behavior, auth destination/upload intent, animation timing/DOM continuity, pause/resume, visibility, reduced motion, preparation order, and media fallback.
+- Type checking passed. Production build passed, with the existing application bundle warning above 500 kB.
+- Scoped lint passed for hero/header/input/composition and tests. Full-project lint still has the pre-existing react-refresh/only-export-components issue in CliprolContext.tsx; this pass does not refactor that context.
+- Built-site headless Edge checks passed at 1440?900, 1280?800, 820?1180, 390?844, and 320?740: all result images fit in the first viewport, no horizontal overflow, neutral headline, no stage frame, and completed reduced-motion presentation.
+- Edge verified source node identity, completion by 2.4 seconds, pause/resume, Gaming ? Podcast ? Coaching cycling, keyboard menu dismissal, and Get started input focus. No runtime exceptions were observed. Screenshots, including hidden-copy examples, are in frontend/node_modules/.cache/landing-review.
+- Live backend processing and real-account authentication were not exercised; shared input behavior was verified with focused tests. Historical milestone test counts are not reported as this checkout's validation.
+
+### Files changed in this hero iteration
+
+- frontend/src/components/landing/HeroTransformation.tsx
+- frontend/src/components/landing/SourcePreview.tsx
+- frontend/src/components/landing/MomentTimeline.tsx
+- frontend/src/components/landing/OutputFan.tsx
+- frontend/src/components/landing/ScenarioMedia.tsx
+- frontend/src/components/landing/useHeroSequence.ts
+- frontend/src/components/landing/heroScenarios.ts
+- frontend/src/pages/LandingPage.tsx
+- frontend/src/index.css
+- frontend/tests/hero-transformation.test.tsx
+- frontend/tests/marketing-media.test.tsx
+- frontend/scripts/verify-landing.mjs
+- frontend/public/media/landing/README.md
+- Cliprol_Product_Vision.md
+- PROJECT_TECHNICAL_REPORT.md
+
+Created media files: frontend/public/media/landing/gaming/source.webp, gaming/clip-1.webp, gaming/clip-2.webp; frontend/public/media/landing/podcast/source.webp, podcast/clip-1.webp, podcast/clip-2.webp; frontend/public/media/landing/coaching/source.webp, coaching/clip-1.webp, coaching/clip-2.webp. Paths abbreviated after each scenario share its preceding directory.
+
+Header.tsx, Hero.tsx, LogoMark.tsx, and InputSection.tsx markup from earlier approved work was retained; this iteration refined their presentation through index.css. No placeholder scenario assets remain. The isolated LogoMark remains a temporary brand mark.
+
+Stop at this hero pass for owner browser review. No deployment or lower-page redesign is included.
+
+## 22. Moment showcase (2026-10-09)
+
+WhyCliprol now renders an automatic image-and-reason composition instead of the previous heading, marketing paragraphs, and feature cards. momentExamples.ts owns the asset descriptions and illustrative reasons. ScenarioMedia is reused for intrinsic dimensions, lazy loading, and the unavailable-image fallback; the hero sequence and functional flows are unchanged.
+
+The owner corrected the initial third-asset mapping: the final loop is Gaming (game-clip1.png / Double Kill), female podcaster (lady-podcast.png), male podcast reaction (guy-react.png). The standing coach is excluded from this section. Each image was visually inspected. Reasons reference visible action/gestures and are explicitly labeled illustrative; no transcript or actual detector output is implied.
+
+Each pair holds for 5 seconds, fades out together for 200 ms, and is replaced atomically by the next pair with a 200 ms entrance included in the next hold. One timer drives both image and reason. Remaining time and CSS animation playback are preserved while manually paused, offscreen, or in a hidden tab. A discreet three-segment indicator and accessible pause/resume button accompany the cycle. Reduced motion presents all three image/reason pairs statically without automatic cycling or a redundant pause button. Desktop pairs the portrait and reason horizontally; mobile stacks them.
+
+New WebP derivatives preserve full 941 x 1672 framing using FFmpeg libwebp quality 84: lady-podcast.webp (72,758 bytes) and guy-react.webp (66,064 bytes). Originals remain untouched. Gaming reuses the existing production derivative. No placeholder assets are used.
+
+Files changed in this pass: frontend/src/components/WhyCliprol.tsx, frontend/src/components/landing/momentExamples.ts (new), frontend/src/index.css, frontend/tests/moment-showcase.test.tsx (new), frontend/public/media/landing/showcase/lady-podcast.webp (new), frontend/public/media/landing/showcase/guy-react.webp (new), and PROJECT_TECHNICAL_REPORT.md.
+
+Validation: 27 tests passed across five files, including three new showcase tests for paired sequencing, remaining-time pause/offscreen behavior, and reduced motion. Type checking, production build, and scoped lint passed. The existing application bundle warning above 500 kB remains. Browser visual review of this section is pending; the prior hero browser checks are not claimed as validation of this new section. Stop for owner visual review.
+
+## 23. Remaining landing-page sections (2026-10-09)
+
+The old three-step HowItWorks layout, placeholder previews, and explanatory cards were removed. HowItWorks retains its composition responsibility but now mounts #ready-to-share: one existing female podcast clip remains the same image as a generic mobile shell emerges around it. The one-shot 3.8-second transformation pauses offscreen or in a hidden tab and settles permanently; reduced motion shows the completed context immediately. There is no audio, platform branding, account, engagement data, or publishing action. The phone frame is a marketing illustration of viewing downloaded content, not an implemented distribution integration.
+
+FAQ retains single-item accordion behavior with only the four adoption questions. Answers describe account requirements, device uploads/YouTube links, local-file reselection after reload, variable processing time, and reviewing suggested clips. Buttons now expose expanded state and answer relationships. Introductory paragraphs were removed.
+
+FinalCTA appears immediately before Footer and uses the requested headline and Get Clips action. The action focuses and scrolls to the existing InputSection; it does not submit, process, authenticate, or persist anything independently. Header shares this focus helper and still hides Get started for signed-in users. Header and Footer share navigation anchors to Moments, Ready to share, and FAQ, with home-route prefixes from other pages. Footer retains the Cliprol mark and functional navigation without fabricated legal/social destinations or open-source claims.
+
+Hero and Moment Showcase runtime behavior and media were unchanged. No backend, pipeline, database, dashboard, auth helper, or input-processing code was changed. CSS additions are scoped to the new/revised sections and use centralized colors, radii, spacing, easing, and shadows.
+
+Files changed in this pass:
+- frontend/src/components/HowItWorks.tsx
+- frontend/src/components/FAQ.tsx
+- frontend/src/components/Footer.tsx
+- frontend/src/components/Header.tsx
+- frontend/src/components/FinalCTA.tsx (new)
+- frontend/src/components/landing/landingNavigation.ts (new)
+- frontend/src/pages/LandingPage.tsx
+- frontend/src/index.css
+- frontend/tests/landing-completion.test.tsx (new)
+- frontend/scripts/verify-landing.mjs
+- PROJECT_TECHNICAL_REPORT.md
+
+Actual validation: 31 tests passed across six files; production build and TypeScript passed. Scoped lint for changed runtime files and new tests passed. Full-project lint failed only on the existing react-refresh/only-export-components error at CliprolContext.tsx:82; that unrelated context was not refactored. The application JS bundle is 505.47 kB, retaining the build warning above 500 kB.
+
+Headless Edge exercised the built site: the source image remains the same node while the completed mobile shell emerges; heading-hidden screenshots show the viewing context without explanatory copy; reduced-motion CSS has no animation; desktop (1440), tablet (820), mobile (390), and small mobile (320) have no horizontal overflow. FAQ disclosure, all header/footer anchor targets, final CTA placement, and shared-input focus passed. Existing hero regressions also passed at five viewport sizes. No runtime exceptions were observed. Screenshots are local under frontend/node_modules/.cache/landing-review, including ready-copy-hidden, ready-{desktop,tablet,mobile,small-mobile}, and final-{desktop,tablet,mobile,small-mobile}. Representative captures were visually inspected.
+
+Limitations: no real-account login or live backend processing was exercised. Tests verify the shared signed-in/signed-out routes and pending URL handoff. Supplied images are still assets; the mobile illustration does not play video or publish it. No new assets or placeholders were introduced. Stop for owner visual review; no deployment is included.
+
+## 24. Landing-page motion refinements
+
+Moment Showcase keeps its existing active clip/reason composition. The actual next asset appears partially behind the main portrait, shadowed and subdued. A 600 ms transition slides/fades the current portrait out while the preview moves into place; the outgoing reason fades with its clip and the next reason is committed with the next active clip. The existing progress and pause controls remain, and a labeled native Next moment button initiates advancement without waiting for the five-second hold. A synchronous transition lock prevents rapid clicks from overlapping. Manual Next while paused completes one transition and retains the paused setting. Small-screen preview overflow is clipped within the section rather than shrinking the main image.
+
+Ready-to-share now keeps all three distinct existing assets mounted in generic viewing shells. The center is dominant; the side clips are scaled and dimmed. After a five-second hold, a 600 ms transform/opacity sequence moves right to center, center to left, and the left clip behind the composition to the right. An accessible pause button controls this automatic rotation. No publishing or engagement features were added.
+
+useClipRotation owns both sections' timer, transition lock, remaining-time pause/resume, viewport/tab visibility, and reduced motion. CSS durations use the exported transition duration. Reduced motion shows all three showcase pairs statically and a static three-clip viewing composition without redundant automatic-playback controls. useSectionEntrances owns one gentle entrance per non-hero section; header entrance and button hover/focus refinements are CSS only. The hero sequence and functional input behavior remain unchanged. No animation dependency or new media asset was introduced.
+
+Files changed: frontend/src/components/WhyCliprol.tsx; frontend/src/components/HowItWorks.tsx; frontend/src/components/landing/useClipRotation.ts (new); frontend/src/components/landing/useSectionEntrances.ts (new); frontend/src/pages/LandingPage.tsx; frontend/src/index.css; frontend/tests/moment-showcase.test.tsx; frontend/scripts/verify-landing.mjs; PROJECT_TECHNICAL_REPORT.md.
+
+Actual checks: 36 tests passed across six files. TypeScript, production build, and scoped lint passed. Focused tests cover preview asset identity, rapid advancement, clip/reason pairing, manual Next while paused, pausing midway through a transition, three persistent ready-to-share images, offscreen/tab visibility, and reduced motion. The build retains the application bundle warning at 507.13 kB. The previously reported full-project lint error in CliprolContext.tsx remains outside this scope.
+
+Headless Edge checked actual upcoming-media advancement under rapid clicks, matching podcast reason, center rotation, persistent ready-to-share image elements, completed viewing shells, reduced motion, existing FAQ/input/navigation regressions, and desktop/tablet/mobile/small-mobile layouts. Representative desktop/mobile screenshots were inspected; the final small-mobile preview check uses document clientWidth to account for the scrollbar. No runtime exceptions were observed. Captures are under frontend/node_modules/.cache/landing-review. No real-account authentication or live backend processing was performed. Stop for visual review.

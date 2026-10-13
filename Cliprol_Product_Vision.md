@@ -1,777 +1,121 @@
-# Cliprol — Product Vision
+# Cliprol Product Vision
 
-## 1. What Is Cliprol?
+Revised 2026-10-06. This is the product source of truth. It supersedes the previous general editing-workspace and open-source direction. Implementation details belong in PROJECT_TECHNICAL_REPORT.md; historical media lifecycle notes remain in PROJECT_MEDIA_MILESTONE.md.
 
-Cliprol is a browser-based video creation and editing platform designed to reduce the amount of repetitive work involved in turning raw video into finished content.
+## 1. Positioning
 
-The idea started from a simple problem:
+Cliprol is a **content repurposing platform for creators**. Intelligent clipping is its first and core capability.
 
-Creating content is not always difficult because of recording.
+> You create once. Cliprol finds more content inside it.
 
-A major part of the difficulty comes after recording.
+The product starts with content a creator has already made and helps discover what useful content it can become. Its central question is: "You already created something. What useful content can we turn it into?"
 
-A creator may have several minutes or hours of footage and still has to:
+## 2. Creators and their problem
 
-- Watch through the footage.
-- Find the moments worth keeping.
-- Remove unnecessary sections.
-- Turn those moments into individual pieces of content.
-- Add captions.
-- Reframe content for different platforms.
-- Adjust audio.
-- Make repetitive edits.
-- Export the finished videos.
+Cliprol serves podcasters, YouTubers, gamers and streamers, coaches, educators, interview creators, talking-head creators, social media creators, and other people repurposing longer recordings.
 
-Traditional video editors provide tools for doing these things, but the creator still performs most of the work manually.
+Finding useful moments, cutting them out, and adapting them for different destinations can take time away from creating. Cliprol should reduce that repeated work while leaving creative judgment with the creator. Consumer messaging should describe these outcomes in familiar language, rather than engineering, APIs, models, databases, or processing architecture.
 
-Cliprol is built around a different idea:
+## 3. Core experience
 
-**The creator should make the creative decisions. The software should help do the tedious work required to execute those decisions.**
+1. Add existing content through a supported URL or upload.
+2. Cliprol analyzes the content and finds valuable moments.
+3. Turn those moments into standalone clips.
+4. Review the suggestions and decide what to use.
+5. As capabilities mature, refine and adapt clips for different formats and destinations.
+6. Eventually support creator-directed publishing and distribution.
 
----
+The initial workflow remains focused and understandable: add a video, find moments, review and download clips.
 
-## 2. The Problem
+## 4. Current capability versus direction
 
-Video creation contains a large amount of repetitive work.
+The following reflects source inspection on 2026-10-06, not a new live-service verification.
 
-Consider a creator who records a 45-minute video but wants to publish five short-form videos from it.
+| Capability | Current implementation / direction |
+| --- | --- |
+| YouTube URL input | Implemented validation and authenticated project-backed processing. Other URL providers are not currently supported by the frontend validator. |
+| Video upload | Implemented input and authenticated project-backed upload endpoint. The file is held in browser memory. Upload intent survives sign-in/reload; a missing file is explicitly requested again. |
+| Moment detection and clipping | Implemented analysis and time-range clip extraction. |
+| Review, download, saved projects | Implemented results and persisted completed-project library; deployment depends on backend and storage configuration. |
+| Captions, creator-adjustable trimming, branding | Product direction, not working landing-page controls. |
+| Reframing, resizing, platform-specific formatting | Product direction. Current extraction preserves source framing; it does not provide selectable social aspect ratios. |
+| Publishing / distribution | Longer-term direction, not currently available. |
 
-Before publishing anything, they may need to:
+Do not represent future functionality as shipped through copy, interactive controls, or illustrations. Conceptual mixed-format outputs must be explicitly presented as product direction until supported. Do not promise processing times, upload limits, privacy policies, or category performance without validation.
 
-1. Watch or scrub through most of the recording.
-2. Identify interesting moments.
-3. Remember where those moments occurred.
-4. Cut each section manually.
-5. Remove unnecessary pauses or sections.
-6. Resize the video for vertical platforms.
-7. Add captions.
-8. Fix framing.
-9. Adjust audio.
-10. Export multiple clips.
+## 5. Creator control
 
-The actual creative decision might simply be:
+Automation assists the creator. It must not silently make irreversible creative decisions or publish on the creator's behalf.
 
-> "This part would make a good video."
+Suggestions should be visible and understandable. The current review/download flow lets creators choose what they use. As refinement capabilities are introduced, changes should be editable, rejectable, and reversible: clip boundaries, caption corrections, framing, and branding remain under creator control. These are design requirements for future capabilities, not claims that an undoable editor exists today.
 
-But turning that decision into a finished piece of content can require several additional operations.
+## 6. Product boundary and evolution
 
-Cliprol exists to reduce that gap between **creative intent** and **finished content**.
+Every new capability should serve repurposing existing content. Relevant directions include intelligent moment detection, clipping, captions, trimming, reframing, aspect-ratio adaptation, branding, destination-specific formatting, and eventually distribution.
 
----
+A timeline can help creators understand detected moments or refine clips. It is a supporting tool, not the center of a general-purpose professional editor. Cliprol is not pursuing feature parity with Premiere Pro or a generic manual editing workspace. Natural-language assistance is optional future interaction design, not a required product stage.
 
-## 3. Product Vision
+Evolve from reliable clipping and review, through clip refinement and multi-platform adaptation, toward distribution only as creator needs and implementation readiness justify it. These are directions, not release commitments.
 
-Cliprol's long-term vision is to become an intelligent video workspace where creators can edit videos manually when they want control and use AI when they want speed.
+## 7. Positioning and business constraints
 
-It should not force creators to choose between:
+Cliprol is no longer positioned as an open-source product. Do not promote GitHub, repositories, developer contribution, or an open-source core in consumer marketing. This does not instruct removal of Git, development infrastructure, dependencies, or license notices.
 
-- a traditional editor where everything is manual, or
-- an AI generator where the software makes decisions for them.
+Monetization and product economics are not finalized. There is no landing-page Pricing section yet. Keep the page composition modular so pricing can be inserted later without redesigning the hero or product flow. Do not imply a permanent free plan or finalized commercial terms.
 
-Cliprol should combine both.
+Do not invent testimonials, customer logos, creator counts, usage statistics, revenue, or other social proof.
 
-A creator should be able to open a video and edit it directly using familiar editing tools.
+## 8. Landing-page strategy
 
-But they should also be able to ask Cliprol to perform work such as:
+The first impression should make a creator understand: "I can give Cliprol content I already created, and Cliprol can find more useful content inside it."
 
-> "Find the best moments from this video."
+Proposed story: hero, creator payoff, how it works, creator/content use cases, multi-platform output direction, FAQ, final CTA, footer. Reuse existing section owners where appropriate. Copy below is direction, not approved final strings.
 
-> "Turn this into short-form clips."
+- Approved hero headline: "Drop your video. Cliprol finds the moments." Subhead: "Turn your podcasts, gaming videos, coaching sessions and more into clips worth sharing." Keep neutral headline typography and let the transformation carry the communication.
+- Benefits: less searching, more useful content from one recording, creator control, and future adaptation to publishing destinations. Possible headline: "Create more. Edit less."
+- How it works: add your video; Cliprol finds the moments; review/use your clips. Use purpose-built visuals.
+- Use cases: explain what different creators might extract, rather than repeating the hero animation.
+- Outputs: "One video. More places to show up." Distinguish planned adaptation from currently generated clips.
+- FAQ: supported videos, YouTube versus upload, variable processing expectations, account requirements, verified ownership/privacy information, and actual output support. Processing currently requires authentication.
+- Final CTA: "Your next clip is already in your video. Let Cliprol find it." Return to the real input workflow.
+- Footer: real Product, Help, Privacy, Terms, Contact, and relevant social destinations when available. No GitHub/open-source promotion or dead placeholder links presented as finished navigation.
 
-> "Remove the long pauses."
+### Two separate hero responsibilities
 
-> "Add captions."
+The functional video input must preserve URL/upload validation, authentication handoff, project creation, and processing navigation through existing owners. It can be visually refined without moving business logic into marketing components.
 
-> "Resize this for TikTok."
+The marketing transformation is integrated into the hero composition and remains separate from real input/processing state. It automatically cycles Gaming ? Podcast ? Coaching using supplied images. Two detected-moment markers precede two emerging 9:16 clips; the same original 16:9 source element moves into the landscape result. There is no framed demo card, stage-label grid, fabricated timestamp, scenario selector, platform-logo wall, or visible capability note. A pause/resume control serves accessibility; reduced motion displays a completed static composition. Multi-format imagery expresses the product direction without adding functional format controls.
 
-> "Find the part where I talked about building the product."
+Scenarios must be typed data consumed by reusable presentation components, not duplicated hero implementations. Adding a category or replacing media should require configuration changes only.
 
-Cliprol performs those operations inside the same editing environment.
+### Visual and interaction principles
 
-The creator can then inspect the result, change it, undo it, or continue editing manually.
+Preserve Cliprol's identity: dark neutral surfaces, clear typography, strong hierarchy, restrained warm orange/peach accents, subtle depth, and purposeful motion. Use accent for selection, moments, markers, and meaningful attention rather than large decorative areas. Extend existing centralized tokens and Tailwind conventions; do not add a second styling system or clone another site.
 
-The goal is not autonomous video creation.
+Design desktop, tablet, and mobile together. Provide semantic structure, keyboard controls, labels, contrast, visible focus, a pause control for continuous animation, and a useful static reduced-motion presentation without automatic cycling. Marketing animation must not distract from entering a real video.
 
-The goal is **AI-assisted video creation with the creator remaining in control.**
+### Asset and performance principles
 
----
+Use creator-provided or appropriately licensed media. Do not generate random creator imagery or borrow third-party creator footage. Missing assets should use intentional, visibly labeled development placeholders.
 
-## 4. The Core Product Philosophy
+Each asset slot must document purpose, aspect ratio, recommended dimensions, replacement path, and accessible description. Media should be replaceable through scenario configuration without restructuring components. Keep initial rendering poster-first, reserve layout dimensions, and avoid downloading every scenario video on first load. Load media only as needed and stop animation when offscreen or the page is hidden.
 
-Cliprol should follow one fundamental principle:
+## 9. Engineering guardrails
 
-> **AI should reduce editing work without taking creative control away from the creator.**
+Keep LandingPage as composition. Reuse existing responsibility owners before adding components, use data for repeated UI, and avoid speculative generic abstractions. Marketing components must not own authentication internals, Supabase access, project persistence, or processing orchestration.
 
-AI-generated actions should therefore be:
+Preserve authentication, URL/upload input, project creation, processing, persisted results, dashboard behavior, and responsive layouts. Restrict refactoring to what the redesign requires. Document meaningful responsibility changes in the technical guide when implemented.
 
-- Visible
-- Understandable
-- Editable
-- Reversible
-- Optional
+The owner approved a focused Header + Hero + functional input + transformation pass, refined through 2026-10-08. The first viewport is a product demonstration: the source, detected moments, and emerging clips should communicate the product within 2?3 seconds even with the headline hidden. Lower-page redesign is deferred. Existing authentication/project behavior is outside this pass.
 
-If Cliprol removes silence, the creator should be able to see what was removed.
+## 10. Product decision filter
 
-If Cliprol identifies a highlight, the creator should be able to see where that highlight exists on the timeline.
+Before adding a capability, ask:
 
-If Cliprol creates a clip, the creator should still be able to adjust its start and end points.
+1. Does it turn existing creator content into something useful?
+2. Does it reduce meaningful discovery or repurposing work?
+3. Does the creator understand and control the result?
+4. Does it fit this focused workflow without requiring a professional editor?
+5. Is it implemented and verified, or must it be described as future direction?
 
-If Cliprol adds captions, the creator should be able to edit them.
-
-AI should behave more like an editing assistant than an invisible decision-maker.
-
----
-
-## 5. The Cliprol Workspace
-
-The editing workspace is the long-term center of Cliprol.
-
-A creator should be able to bring a video into Cliprol and perform both traditional and AI-assisted editing without constantly moving between different tools.
-
-The workspace can eventually contain several major areas.
-
-### Video Preview
-
-The creator needs to see the current state of the video and preview changes as they edit.
-
-### Timeline
-
-The timeline represents the structure of the video.
-
-Creators should eventually be able to:
-
-- Navigate the video.
-- Select clips.
-- Split clips.
-- Trim sections.
-- Rearrange sections.
-- Remove sections.
-- Inspect detected highlights.
-- Inspect detected silence.
-- View captions and other editing elements.
-
-AI discoveries should also appear visually on the timeline where appropriate.
-
-For example, instead of automatically deleting every detected silence, Cliprol could mark those regions and allow the creator to decide what happens to them.
-
-### Editing Tools
-
-Cliprol should provide the essential tools required to make meaningful changes to a video.
-
-The objective is not to reproduce every feature found in professional desktop editing software.
-
-The objective is to provide the tools most creators repeatedly need while making those tools significantly faster through intelligent assistance.
-
-### AI Assistant
-
-AI assistance should exist inside the editing experience rather than feeling like a completely separate product.
-
-A creator should eventually be able to describe what they want using natural language.
-
-For example:
-
-> "Remove the awkward pause at the beginning."
-
-> "Create three short clips from this."
-
-> "Add captions."
-
-> "Make this vertical."
-
-> "Find the section where I explain the main idea."
-
-The assistant interprets the request and performs editing operations using Cliprol's underlying tools.
-
-The resulting changes should still be visible and editable through the normal interface.
-
----
-
-## 6. Core Product Capabilities
-
-Cliprol can grow into several connected capabilities.
-
-These capabilities do not all need to exist in the initial product.
-
-They describe the direction of the platform.
-
-### 6.1 Intelligent Clipping
-
-Cliprol should analyze longer videos and identify moments that may work as standalone content.
-
-Instead of requiring creators to scrub through an entire recording, Cliprol can surface candidate moments.
-
-The creator can then:
-
-- Preview them.
-- Reject them.
-- Adjust their boundaries.
-- Edit them.
-- Export them.
-
-Automatic clipping is therefore not the entire Cliprol product.
-
-It is one intelligent capability within the larger editing environment.
-
----
-
-### 6.2 Split, Cut and Trim
-
-Creators should be able to perform basic timeline editing directly.
-
-This includes:
-
-- Splitting clips.
-- Trimming beginnings and endings.
-- Removing unwanted sections.
-- Rearranging sections where appropriate.
-
-AI commands should eventually be able to trigger these same operations.
-
-The important principle is that manual editing and AI editing operate on the same underlying project.
-
----
-
-### 6.3 Captions
-
-Cliprol should be able to generate captions from speech.
-
-Creators should be able to:
-
-- Generate captions automatically.
-- Correct transcription mistakes.
-- Change how captions appear.
-- Control timing where necessary.
-- Enable or disable captions.
-
-Captions should remain editable content rather than being permanently baked into the video immediately after generation.
-
----
-
-### 6.4 Resize and Reframe
-
-Creators frequently publish the same content across platforms with different aspect ratios.
-
-Cliprol should help convert videos between formats such as:
-
-- Horizontal
-- Vertical
-- Square
-
-Where appropriate, intelligent reframing can help keep the important subject visible.
-
-The creator should still be able to correct or manually adjust the framing.
-
----
-
-### 6.5 Silence Detection
-
-Cliprol should be able to detect periods of silence or low activity.
-
-These regions can be represented on the timeline.
-
-The creator could then:
-
-- Remove individual silent sections.
-- Remove multiple detected sections.
-- Ignore them.
-- Adjust the detection result.
-
-Detection and deletion should remain separate concepts.
-
-Cliprol can identify something without automatically deciding that it should disappear.
-
----
-
-### 6.6 Highlight Detection
-
-Cliprol should be capable of identifying moments that may deserve the creator's attention.
-
-These could eventually be represented as markers on the timeline.
-
-Highlight detection could support:
-
-- Short-form clipping.
-- Navigation through long recordings.
-- Finding important sections.
-- Creating multiple pieces of content from one recording.
-
----
-
-### 6.7 Audio Controls
-
-Creators should eventually have access to essential audio controls such as:
-
-- Muting audio.
-- Adjusting volume.
-- Managing original audio.
-- Adding music or other audio.
-- Removing or reducing unwanted silent sections.
-
-More advanced audio intelligence can be introduced where it solves a clear creator problem.
-
----
-
-### 6.8 Effects and Presentation
-
-Cliprol can gradually support visual presentation tools and effects.
-
-These should serve the editing process rather than turning the product into an unnecessarily complex professional effects suite.
-
-The focus should remain on helping creators produce publishable content quickly.
-
----
-
-## 7. AI as an Interface to Editing
-
-One of Cliprol's most important long-term opportunities is allowing natural language to become another way of operating a video editor.
-
-Traditional editors require users to understand where every tool is located.
-
-Cliprol can retain those manual controls while adding another interaction model:
-
-**Tell the editor what you want.**
-
-For example:
-
-> "Cut the first five seconds."
-
-Cliprol can translate that request into a timeline operation.
-
-> "Remove the long pauses."
-
-Cliprol can detect silence and propose or perform the relevant cuts.
-
-> "Make a short clip from the part where I explain Cliprol."
-
-Cliprol can search the video's content, identify the relevant section, and create a clip.
-
-The AI assistant therefore should not exist as a chatbot that merely talks about the video.
-
-It should eventually be capable of **operating the editing system itself.**
-
-This creates an important architectural product principle:
-
-> Anything AI can change should ideally also be understandable and controllable through the editing interface.
-
----
-
-## 8. The Role of Automation
-
-Cliprol should automate work, not creativity.
-
-There is an important difference.
-
-Automation is valuable when the creator already knows the outcome they want but achieving it requires repetitive operations.
-
-Examples include:
-
-- Detecting silence.
-- Transcribing speech.
-- Resizing video.
-- Searching through footage.
-- Finding candidate highlights.
-- Creating initial clip boundaries.
-- Applying repetitive formatting.
-
-The creator should remain responsible for the final creative judgment.
-
-Cliprol helps them reach that judgment faster.
-
----
-
-## 9. Current Entry Point: Clipping
-
-Cliprol does not need to build the entire vision at once.
-
-The first focused problem is:
-
-> **Helping creators find useful moments inside longer videos and turn those moments into clips.**
-
-The initial experience can therefore remain simple:
-
-```text
-Add a video
-      ↓
-Cliprol analyzes it
-      ↓
-Interesting moments are detected
-      ↓
-Clips are generated
-      ↓
-Creator reviews the results
-      ↓
-Creator uses or downloads the clips
-```
-
-This solves a real part of the larger problem while providing a foundation for the broader editing experience.
-
-The clipping product should therefore be viewed as **Cliprol's entry point**, not its final form.
-
----
-
-## 10. Evolution of the Product
-
-The product can evolve progressively.
-
-### Stage 1 — Intelligent Clipping
-
-Focus on reliably turning longer videos into useful short clips.
-
-Core experience:
-
-```text
-Video → Analyze → Detect → Clip → Review
-```
-
-### Stage 2 — Clip Refinement
-
-Allow creators to modify the generated clips.
-
-This introduces capabilities such as:
-
-- Trimming.
-- Splitting.
-- Captions.
-- Reframing.
-- Basic audio control.
-
-Generated clips stop being fixed outputs and become editable projects.
-
-### Stage 3 — Editing Workspace
-
-The editing environment becomes a more complete workspace.
-
-Creators can begin with either:
-
-- a raw video, or
-- clips suggested by Cliprol.
-
-Manual editing and intelligent assistance coexist inside the same project.
-
-### Stage 4 — AI Editing Assistant
-
-Natural language becomes a major interface to the editing engine.
-
-Creators can describe desired changes and Cliprol translates those instructions into editable timeline operations.
-
-At this stage, the experience moves closer to:
-
-```text
-Creator's intent
-      ↓
-AI understands the request
-      ↓
-Cliprol performs editing operations
-      ↓
-Changes appear in the workspace
-      ↓
-Creator reviews/modifies them
-```
-
-The creator remains the final decision-maker throughout the process.
-
----
-
-## 11. Who Cliprol Is For
-
-Cliprol is primarily designed for creators who regularly work with video but do not want video editing to consume a large portion of their creative process.
-
-This can include:
-
-- Solo content creators.
-- YouTubers.
-- Streamers.
-- Podcasters.
-- Educators.
-- Developers creating technical content.
-- Founders building in public.
-- Social media creators.
-- Small content teams.
-
-The initial product should especially serve people who create longer videos and want to reuse those recordings as shorter content.
-
----
-
-## 12. The Desired User Experience
-
-Cliprol should feel simple before it feels powerful.
-
-A new creator should not need to understand professional video-editing terminology before getting value from the product.
-
-The interface should progressively reveal complexity.
-
-A user who simply wants clips should be able to:
-
-```text
-Add video → Get clips → Review → Export
-```
-
-A user who wants more control should be able to open those clips in the editing workspace.
-
-A more experienced user should be able to interact directly with the timeline and editing tools.
-
-And someone who prefers AI assistance should be able to describe what they want.
-
-These interaction methods should eventually coexist.
-
----
-
-## 13. Product Principles
-
-### Creator Control
-
-The creator has final authority over the video.
-
-AI assists rather than dictates.
-
-### Visible AI Actions
-
-Important AI-generated changes should be visible to the user.
-
-### Reversible Actions
-
-Creators should be able to undo or reject AI-generated edits.
-
-### Editable Results
-
-AI output should not unnecessarily become a fixed final product.
-
-Where possible, it should become editable material inside the project.
-
-### Simplicity Before Feature Count
-
-Cliprol should not become complicated simply because competitors have many features.
-
-Every major feature should solve a meaningful creator workflow problem.
-
-### AI Where It Saves Work
-
-AI should not be added to features merely to make Cliprol appear more intelligent.
-
-It should be used where understanding content or automating repetitive work provides genuine value.
-
-### Manual and AI Editing Together
-
-Users should never be forced to rely entirely on AI.
-
-Traditional controls remain important.
-
-### Browser First
-
-Cliprol should aim to make meaningful video creation possible from the browser without requiring creators to build their workflow around heavyweight desktop software.
-
-### Progressive Complexity
-
-A beginner should be able to use Cliprol without understanding the entire editor.
-
-Advanced capabilities can appear as users need them.
-
----
-
-## 14. What Cliprol Is Not
-
-### Cliprol Is Not Just an AI Clip Generator
-
-Automatic clipping is the initial focused use case.
-
-The broader product is an intelligent video creation and editing environment.
-
-### Cliprol Is Not an Autonomous Creator
-
-Cliprol should not attempt to replace the creator's judgment.
-
-It assists with execution.
-
-### Cliprol Is Not a CapCut Clone
-
-Cliprol can share common editing concepts with existing editors because creators still need familiar operations such as trimming, captions and resizing.
-
-But the goal is not to reproduce another editor feature-for-feature.
-
-The differentiating experience should come from combining an understandable editing workspace with intelligent assistance.
-
-### Cliprol Is Not AI for the Sake of AI
-
-Features should not exist simply because an AI model can perform them.
-
-They should remove friction from real creator workflows.
-
-### Cliprol Is Not Intended to Become Needlessly Complex
-
-Professional editing applications can contain hundreds of controls.
-
-Cliprol should prioritize the subset of editing capabilities that provides the greatest value to its target creators.
-
----
-
-## 15. Why Cliprol Can Be Different
-
-Many video tools fall primarily into one of two categories.
-
-### Traditional Editors
-
-They provide extensive control but require the creator to perform most operations manually.
-
-### Automated AI Tools
-
-They can generate results quickly but may hide decisions from the creator or provide limited control over what happened.
-
-Cliprol should sit between these approaches:
-
-```text
-            Traditional Editing
-                  CONTROL
-                     │
-                     │
-                     ▼
-             ┌──────────────┐
-             │   CLIPROL    │
-             │              │
-             │ Control + AI │
-             └──────────────┘
-                     ▲
-                     │
-                     │
-                 AUTOMATION
-              AI Video Tools
-```
-
-The opportunity is not merely to add AI to an editor.
-
-It is to rethink the relationship between **creator intent, editing tools and automation**.
-
----
-
-## 16. The Long-Term Experience
-
-A mature Cliprol experience could look like this:
-
-A creator uploads or imports a long recording.
-
-Cliprol analyzes the content and understands useful structural information about the video.
-
-The workspace opens.
-
-The creator can immediately see:
-
-- The video.
-- The timeline.
-- Potential highlights.
-- Silence or low-activity regions.
-- Generated transcript/captions.
-- Suggested clips.
-
-The creator could manually begin editing.
-
-Or they could say:
-
-> "Find the best three moments where I explain the product."
-
-Cliprol identifies them.
-
-The creator previews the suggestions.
-
-They select one and say:
-
-> "Make this vertical and add captions."
-
-Cliprol performs the operations.
-
-The creator notices that the opening is too long and manually trims it on the timeline.
-
-They then adjust a caption, change the framing and export the finished video.
-
-During that entire process, AI and manual editing are not separate workflows.
-
-They are two ways of controlling the same editor.
-
-That is the experience Cliprol should ultimately work toward.
-
----
-
-## 17. Open-Source Direction
-
-Cliprol is intended to be developed as an open-source product.
-
-Open source can allow:
-
-- Developers to understand how Cliprol works.
-- Contributors to improve the product.
-- New integrations and capabilities to emerge.
-- The project to benefit from community experimentation.
-- Users to have greater visibility into the software they rely on.
-
-Open source does not require every future Cliprol service to be free.
-
-A sustainable Cliprol business could potentially combine an open-source core with hosted infrastructure, premium capabilities or services that are expensive to operate.
-
-The exact monetization model can evolve with the product.
-
-The product vision should not depend on prematurely choosing one business model.
-
----
-
-## 18. Business Direction
-
-Cliprol should eventually create value by saving creators something measurable:
-
-**time and editing effort.**
-
-That provides a stronger foundation for monetization than simply charging for access to AI.
-
-Potential paid value can eventually come from areas such as:
-
-- Higher processing capacity.
-- Larger projects.
-- More storage.
-- Faster processing.
-- Advanced AI capabilities.
-- Premium editing tools.
-- Advanced transcription/captioning.
-- Team workflows.
-- Hosted cloud processing.
-
-These possibilities should be validated against actual user behavior before becoming major product commitments.
-
----
-
-## 19. Product Decision Filter
-
-As Cliprol grows, new ideas should be evaluated against the core vision.
-
-Before adding a major feature, ask:
-
-1. What creator problem does this solve?
-2. Does it reduce meaningful editing work?
-3. Does it fit naturally inside the Cliprol workflow?
-4. Can the creator understand what the feature did?
-5. Does the creator retain control?
-6. Is AI actually necessary for this feature?
-7. Does this make Cliprol meaningfully better, or simply larger?
-8. Does it help move Cliprol toward an intelligent editing workspace?
-
-A feature that fails these questions should not automatically be added simply because competitors have it.
-
----
-
-## 20. The North Star
-
-Cliprol should make the distance between:
-
-> **"I know what I want this video to become."**
-
-and
-
-> **"The video is ready."**
-
-as short as possible.
-
-Not by removing the creator from the process.
-
-By removing the unnecessary work between the creator's idea and the finished result.
-
-The long-term goal is therefore bigger than automatic clipping.
-
-Cliprol should become a video workspace where:
-
-**creators provide the intent, AI handles more of the repetitive execution, and creators retain control over the final result.**
+The north star is helping creators find more useful content inside what they already created, while keeping the final creative decisions theirs.

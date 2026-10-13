@@ -1,26 +1,29 @@
-import Hero from "../components/Hero";
-import PreviewFrame from "../components/PreviewFrame";
+﻿import Hero from "../components/Hero";
 import InputSection from "../components/InputSection";
+import HeroTransformation from "../components/landing/HeroTransformation";
 import WhyCliprol from "../components/WhyCliprol";
 import HowItWorks from "../components/HowItWorks";
 import FAQ from "../components/FAQ";
 import Footer from "../components/Footer";
+import FinalCTA from "../components/FinalCTA";
+import { useSectionEntrances } from "../components/landing/useSectionEntrances";
 
-const LandingPage = () => {
+export default function LandingPage() {
+  useSectionEntrances();
   return (
-    <div>
-      <Hero />
-      <InputSection />
-      <PreviewFrame
-        title="Cliprol in action"
-        description="Soon you'll see the complete workflow from upload to finished clips."
-      />
-      <WhyCliprol />
-      <HowItWorks />
-      <FAQ />
+    <>
+      <main id="main">
+        <section className="hero" aria-label="Find moments in your video">
+          <Hero />
+          <InputSection />
+          <HeroTransformation />
+        </section>
+        <WhyCliprol />
+        <HowItWorks />
+        <FAQ />
+        <FinalCTA />
+      </main>
       <Footer />
-    </div>
+    </>
   );
-};
-
-export default LandingPage;
+}

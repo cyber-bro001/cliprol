@@ -1,3 +1,4 @@
+import { hasPendingUpload } from "../../lib/authHelpers/pendingInput";
 import { useCliprolContext } from "../../context/CliprolContext";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -26,7 +27,7 @@ const SignupPage = () => {
     setLoading,
     setFieldErrors,
     setSubmitError,
-    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl")), { replace: true }),
+    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl"), hasPendingUpload()), { replace: true }),
   });
 
   return (
@@ -156,18 +157,6 @@ const SignupPage = () => {
           </Link>
         </p>
 
-        {/* Terms */}
-        <p className="text-center text-xs text-[var(--color-text-dim)] mt-4 leading-relaxed">
-          By creating an account you agree to our{" "}
-          <a href="/terms" className="hover:text-[var(--color-text-muted)]">
-            Terms
-          </a>{" "}
-          and{" "}
-          <a href="/privacy" className="hover:text-[var(--color-text-muted)]">
-            Privacy Policy
-          </a>
-          .
-        </p>
       </div>
     </div>
   );

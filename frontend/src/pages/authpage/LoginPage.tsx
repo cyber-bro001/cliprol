@@ -1,3 +1,4 @@
+import { hasPendingUpload } from "../../lib/authHelpers/pendingInput";
 import { useCliprolContext } from "../../context/CliprolContext";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -21,7 +22,7 @@ const Login = () => {
     setLoading,
     setFieldErrors,
     setSubmitError,
-    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl")), { replace: true }),
+    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl"), hasPendingUpload()), { replace: true }),
   });
 
   return (

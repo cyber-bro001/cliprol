@@ -1,50 +1,18 @@
-const Footer = () => {
+import { Link, useLocation } from "react-router-dom";
+import LogoMark from "./LogoMark";
+import { landingLinks } from "./landing/landingNavigation";
+
+export default function Footer() {
+  const isLanding = useLocation().pathname === "/";
   return (
-    <footer className="border-t border-[var(--color-border)] px-6 py-16">
-      <div className="mx-auto flex max-w-5xl flex-col gap-12 md:flex-row md:items-end md:justify-between">
-        {/* Brand */}
-        <div className="max-w-sm">
-          <h2 className="text-2xl font-semibold text-[var(--color-text)]">
-            Cliprol
-          </h2>
-
-<p className="mt-4 leading-8 text-[var(--color-text-muted)]">
-            Less time editing.
-            <br />
-            More time creating.
-          </p>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex flex-col gap-3 text-sm text-[var(--color-text-muted)] md:items-end">
-          <a
-            href="#"
-            className="transition-colors duration-150 hover:text-[var(--color-text)]"
-          >
-            Privacy
-          </a>
-
-          <a
-            href="#"
-            className="transition-colors duration-150 hover:text-[var(--color-text)]"
-          >
-            Terms
-          </a>
-
-          <a
-            href="#"
-            className="transition-colors duration-150 hover:text-[var(--color-text)]"
-          >
-            Contact
-          </a>
-
-          <p className="mt-6 text-xs text-[var(--color-text-dim)]">
-            © 2026 Cliprol. All rights reserved.
-          </p>
-        </div>
+    <footer className="site-footer">
+      <div className="page-width footer-inner">
+        <Link to="/" className="brand"><LogoMark /><span>Cliprol</span></Link>
+        <nav aria-label="Footer">
+          {landingLinks.map(link => <a key={link.href} href={isLanding ? link.href : `/${link.href}`}>{link.label}</a>)}
+        </nav>
+        <small>{new Date().getFullYear()} Cliprol</small>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

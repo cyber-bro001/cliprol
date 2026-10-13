@@ -1,3 +1,4 @@
+import { hasPendingUpload } from "../lib/authHelpers/pendingInput";
 import { Navigate, useLocation } from "react-router-dom";
 import { useCliprolContext } from "../context/CliprolContext";
 import { loginDestination } from "../lib/authHelpers/destination";
@@ -13,7 +14,7 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
   if (authLoading) return <p role="status" className="p-6 text-center">Loading session…</p>;
 
   if (session) {
-    return <Navigate to={loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl"))} replace />;
+    return <Navigate to={loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl"), hasPendingUpload())} replace />;
   }
 
   return <>{children}</>;

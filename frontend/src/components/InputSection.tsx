@@ -1,52 +1,67 @@
+import { useEffect, useId, useRef } from "react";
+import { ArrowUpRight, Link2, Upload } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCliprolContext } from "../context/CliprolContext";
 import { validateVideoUrl } from "../lib/platforms";
+import { hasPendingUpload, rememberInput } from "../lib/authHelpers/pendingInput";
 
-type InputSectionProps = { onProcess?: () => Promise<void> | void };
+function FilePreview({ file }: { file: File }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(file);
+    if (videoRef.current) videoRef.current.src = objectUrl;
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+  return <video ref={videoRef} controls preload="metadata" className="input-video" aria-label="Selected video preview" />;
+}
 
-const InputSection = ({ onProcess }: InputSectionProps) => {
+export default function InputSection({ onProcess }: { onProcess?: () => Promise<void> | void }) {
   const navigate = useNavigate();
-  const isLandingPage = useLocation().pathname === "/";
-  const { setError, error, inputMode, setInputMode, videoUrl, setVideoUrl, videoFile, setVideoFile, processing, setProcessing, session } = useCliprolContext();
-
-  const validateInput = () => {
+  const isLanding = useLocation().pathname === "/";
+  const id = useId();
+  const { setError, error, inputMode, setInputMode, videoUrl, setVideoUrl, videoFile, setVideoFile, processing, setProcessing, session, authLoading } = useCliprolContext();
+  const selectMode = (mode: "url" | "upload") => { setInputMode(mode); setError(null); };
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (processing || authLoading) return;
     if (inputMode === "url") {
       const result = validateVideoUrl(videoUrl);
-      if (!result.valid) { setError(result.reason); return false; }
-    } else if (!videoFile) { setError("Please upload a video."); return false; }
+      if (!result.valid) { setError(result.reason); return; }
+    } else if (!videoFile) { setError("Choose a video from your device to continue."); return; }
     setError(null);
-    return true;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateInput()) return;
-    if (isLandingPage) {
-      if (inputMode === "url") sessionStorage.setItem("cliprol.pendingVideoUrl", videoUrl);
+    if (isLanding) {
+      rememberInput(inputMode, videoUrl);
       navigate(session ? "/dashboard/new-project" : "/login");
       return;
     }
     if (!onProcess) return;
     setProcessing(true);
     try { await onProcess(); }
-    catch (error) {
-      setError(error instanceof Error ? error.message : "Unable to create project. Please try again.");
+    catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to create project. Please try again.");
       setProcessing(false);
     }
   };
-
-  return <section className="mx-auto max-w-3xl px-0 pb-8 sm:pb-16">
-    <div className="mb-6 flex items-center justify-center border-b border-[var(--color-border)]">
-      <button onClick={() => setInputMode("url")} className={`mr-6 px-0 py-3 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer sm:mr-8 ${inputMode === "url" ? "border-[var(--color-accent)] text-[var(--color-text)] font-semibold" : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>YouTube link</button>
-      <button onClick={() => setInputMode("upload")} className={`px-0 py-3 text-sm font-medium border-b-2 transition-colors duration-150 cursor-pointer ${inputMode === "upload" ? "border-[var(--color-accent)] text-[var(--color-text)] font-semibold" : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>Upload video</button>
-    </div>
-    {inputMode === "url" && <div className="mb-4 flex min-w-0 items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 focus-within:border-[var(--color-text-muted)]"><input type="url" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="Paste your video link here" className="min-w-0 flex-1 bg-transparent border-none outline-none text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-dim)] font-light" /></div>}
-    {inputMode === "upload" && <div className="mb-4 w-full">
-      {videoFile ? <div className="relative overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3 sm:p-4"><video src={URL.createObjectURL(videoFile)} className="mx-auto h-auto max-h-64 w-full object-cover sm:w-4/5" controls /><div className="flex min-w-0 items-center justify-between gap-3 px-1 py-3 sm:px-4"><div className="min-w-0"><p className="truncate text-xs font-medium text-[var(--color-text)]">{videoFile.name}</p><p className="mt-0.5 text-xs text-[var(--color-text-dim)]">{(videoFile.size / (1024 * 1024)).toFixed(2)} MB</p></div><button onClick={() => setVideoFile(null)} className="shrink-0 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Change file</button></div></div> : <div className="mb-4 cursor-pointer rounded-[var(--radius-sm)] border border-dashed border-[var(--color-border)] p-8 text-center transition-colors duration-150 hover:border-[var(--color-text-muted)] hover:bg-[var(--color-surface2)] sm:p-12" onClick={() => document.getElementById("video-upload")?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) setVideoFile(file); }}><input id="video-upload" type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files ? e.target.files[0] : null)} className="hidden" /><p className="text-sm text-[var(--color-text-muted)] font-light">Drop your video here or <span className="text-[var(--color-text)]">choose one from your device</span></p><p className="mt-2 text-xs tracking-wide text-[var(--color-text-dim)]">MP4 · MOV · AVI — up to 2GB</p></div>}
-    </div>}
-    {error && <div className="mb-5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface2)] px-4 py-3"><p className="text-sm text-[var(--color-text)]">{error}</p></div>}
-    <button disabled={processing} onClick={handleSubmit} className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold py-3 rounded-[var(--radius-sm)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-white">{processing ? "Preparing..." : isLandingPage ? "Continue" : "Process"}</button>
-    <div className="mt-4 flex w-full flex-wrap justify-center gap-x-4 gap-y-1 text-[var(--color-text-muted)] sm:gap-6"><span className="text-xs">No credit card required</span><span className="text-xs">Video URL or upload</span><span className="text-xs">Ready in minutes</span></div>
-  </section>;
-};
-
-export default InputSection;
+  return <form id="video-input" className="video-input" onSubmit={submit} noValidate aria-label="Add your video">
+    <fieldset disabled={processing || authLoading}>
+      <legend className="sr-only">Choose your video source</legend>
+      <div className="input-modes">
+        <button type="button" aria-pressed={inputMode === "url"} onClick={() => selectMode("url")}><Link2 size={16} aria-hidden="true" /> YouTube link</button>
+        <button type="button" aria-pressed={inputMode === "upload"} onClick={() => selectMode("upload")}><Upload size={16} aria-hidden="true" /> Upload video</button>
+      </div>
+      {inputMode === "url" ? <div className="input-row">
+        <label htmlFor={`${id}-url`} className="sr-only">YouTube video URL</label>
+        <input id={`${id}-url`} type="url" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="Paste your YouTube video link" aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined} />
+        <button className="button-primary" type="submit">{processing ? "Preparing…" : "Find my clips"}<ArrowUpRight size={18} aria-hidden="true" /></button>
+      </div> : <div className="upload-area" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); if (!processing && !authLoading) setVideoFile(e.dataTransfer.files[0] ?? null); }}>
+        {videoFile && <><FilePreview file={videoFile} /><p className="file-name">{videoFile.name}</p></>}
+        {!videoFile && hasPendingUpload() && <p role="status">Your local video isn’t available here. Please select it again to continue.</p>}
+        <label htmlFor={`${id}-file`}>{videoFile ? "Choose a different video" : "Drop a video here, or choose a file"}</label>
+        <input id={`${id}-file`} type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] ?? null)} aria-describedby={error ? `${id}-error` : undefined} />
+        <button className="button-primary" type="submit">{processing ? "Preparing…" : "Find my clips"}<ArrowUpRight size={18} aria-hidden="true" /></button>
+      </div>}
+    </fieldset>
+    {error && <p id={`${id}-error`} role="alert" className="input-error">{error}</p>}
+    <p className="input-note">{isLanding && !session ? "Sign in to create a project and review your clips." : "Your video. Your choice of what to use."}{inputMode === "upload" && " If you reload or leave this browser session, you’ll need to select your file again."}</p>
+  </form>;
+}

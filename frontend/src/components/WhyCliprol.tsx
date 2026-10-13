@@ -1,76 +1,41 @@
-import PreviewFrame from "./PreviewFrame";
+import { ArrowRight, Pause, Play } from "lucide-react";
+import type { CSSProperties } from "react";
+import ScenarioMedia from "./landing/ScenarioMedia";
+import { momentExamples } from "./landing/momentExamples";
+import { rotationTransition, useClipRotation } from "./landing/useClipRotation";
 
-const WhyCliprol = () => {
-  const reasons = [
-    {
-      title: "Save hours",
-      description:
-        "Stop scrubbing through long recordings looking for highlights. Cliprol helps you get to the moments that matter faster.",
-      preview: "Timeline Preview",
-    },
-    {
-      title: "Stay in control",
-      description:
-        "Every clip is yours to review, download, and decide what gets shared. Nothing is published without you.",
-      preview: "Clip Preview",
-    },
-    {
-      title: "Built for creators",
-      description:
-        "From podcasts and interviews to gameplay, tutorials, and livestreams, Cliprol fits naturally into your workflow.",
-      preview: "Creator Preview",
-    },
-  ];
-
+export default function WhyCliprol() {
+  const { sectionRef, step, paused, setPaused, running, reduced, next } = useClipRotation(momentExamples.length);
+  const examples = reduced ? momentExamples : [momentExamples[step.index]];
+  const upcoming = momentExamples[(step.index + 1) % momentExamples.length];
   return (
-    <section id="whycliprol" className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
-        {/* Heading */}
-        <div className="max-w-2xl">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Why Cliprol
-          </p>
-
-          <h2 className="mt-3 text-3xl font-semibold leading-tight text-[var(--color-text)] md:text-4xl">
-            Every long video is full of moments worth sharing.
-          </h2>
-
-          <p className="mt-5 leading-8 text-[var(--color-text-muted)]">
-            Finding them shouldn't take longer than creating them. Cliprol helps
-            you spend less time editing and more time publishing.
-          </p>
+    <section id="whycliprol" ref={sectionRef} className="moment-showcase page-width"
+      aria-label="Illustrative clip selection examples" data-running={running} data-reduced={reduced}
+      style={{ "--rotation-duration": `${rotationTransition}ms` } as CSSProperties}>
+      {examples.map(example => (
+        <figure key={example.id} className="moment-example" data-transitioning={!reduced && step.transitioning}>
+          <div className="moment-media-stack">
+            {!reduced && <div className="moment-next-preview" aria-hidden="true"><ScenarioMedia media={upcoming.media} /></div>}
+            <div className="moment-clip"><ScenarioMedia media={example.media} /></div>
+          </div>
+          <figcaption className="moment-reason">
+            <span className="moment-reason-label">Illustrative selection reason</span>
+            <p>{example.reason}</p>
+          </figcaption>
+        </figure>
+      ))}
+      {!reduced && <div className="moment-controls">
+        <div className="moment-progress" aria-label={`Example ${step.index + 1} of ${momentExamples.length}`}>
+          {momentExamples.map((example, index) => <span key={example.id} data-active={index === step.index} />)}
         </div>
-
-        {/* Content */}
-        <div className="mt-20">
-          {reasons.map((reason, index) => (
-            <div
-              key={reason.title}
-              className={`grid gap-10 py-12 md:grid-cols-2 ${
-                index !== reasons.length - 1
-                  ? "border-b border-[var(--color-border)]"
-                  : ""
-              }`}
-            >
-              {/* Text */}
-              <div className="flex flex-col justify-center">
-                <h3 className="text-2xl font-medium text-[var(--color-text)]">
-                  {reason.title}
-                </h3>
-
-                <p className="mt-5 leading-8 text-[var(--color-text-muted)]">
-                  {reason.description}
-                </p>
-              </div>
-
-              {/* Preview */}
-              <PreviewFrame title={reason.preview} />
-            </div>
-          ))}
-        </div>
-      </div>
+        <button type="button" className="moment-pause" onClick={() => setPaused(value => !value)}
+          aria-label={paused ? "Resume moment showcase" : "Pause moment showcase"}>
+          {paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
+        </button>
+        <button type="button" className="moment-pause" onClick={next} disabled={step.transitioning} aria-label="Next moment">
+          <ArrowRight size={16} aria-hidden="true" />
+        </button>
+      </div>}
     </section>
   );
-};
-
-export default WhyCliprol;
+}

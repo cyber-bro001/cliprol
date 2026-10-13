@@ -1,3 +1,4 @@
+import { hasPendingUpload } from "../lib/authHelpers/pendingInput";
 import { createContext, useContext, useState, useEffect } from "react";
 import type { CliprolContextType } from "../types";
 import type { CliprolProviderProps } from "../types";
@@ -17,7 +18,7 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
   const [clips, setClips] = useState<CliprolContextType["clips"]>([]);
 
   const [inputMode, setInputMode] =
-    useState<CliprolContextType["inputMode"]>("url");
+    useState<CliprolContextType["inputMode"]>(() => hasPendingUpload() ? "upload" : "url");
   const [videoUrl, setVideoUrl] = useState<CliprolContextType["videoUrl"]>(
     () => sessionStorage.getItem("cliprol.pendingVideoUrl") ?? "",
   );

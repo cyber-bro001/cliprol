@@ -1,3 +1,4 @@
+import { clearPendingInput } from "../../lib/authHelpers/pendingInput";
 import InputSection from "../../components/InputSection";
 import { useNavigate } from "react-router-dom";
 import { useCliprolContext } from "../../context/CliprolContext";
@@ -17,7 +18,7 @@ const NewProject = () => {
     }
     setError(null);
     const project = await createProject({ title: inputMode === "url" ? "Untitled project" : videoFile?.name || "Untitled project", inputType: inputMode, inputUrl: inputMode === "url" ? videoUrl : undefined });
-    sessionStorage.removeItem("cliprol.pendingVideoUrl");
+    clearPendingInput();
     navigate(`/dashboard/process/${project.id}`);
   };
 
