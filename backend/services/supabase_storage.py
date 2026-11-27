@@ -4,6 +4,7 @@ MEDIA_ACCESS_SECONDS = 3600
 
 
 def upload_clip(file_path: str, storage_path: str):
+    # Storage access is intentionally backend-only by the current Storage RLS policy.
     from supabase_folder.supabase_client import supabase
 
     with open(file_path, "rb") as file:

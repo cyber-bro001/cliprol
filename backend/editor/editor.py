@@ -34,7 +34,9 @@ def create_clip(video_path, start_time, end_time, folder):
         clip.write_videofile(
             output,
             codec="libx264",
-            audio_codec="aac"
+            audio_codec="aac",
+            preset="veryfast",
+            threads=2,
         )
     finally:
         try:

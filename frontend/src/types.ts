@@ -67,6 +67,7 @@ export type CliprolContextType = {
 
   signUpWithEmail: (credentials: userCrediantailsType) => Promise<AuthResult>;
   signInWithEmail: (credentials: userCrediantailsType) => Promise<AuthResult>;
+  signInWithGoogle: () => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
 };
 

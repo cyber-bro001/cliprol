@@ -34,3 +34,11 @@ yt-dlp --version
 
 The yt-dlp version should be `2026.8.19`. Direct YouTube downloads and full
 Cliprol YouTube URL processing have been verified with this setup.
+
+## Upload size limit
+
+Uploaded videos are limited to 3 GiB by default. Set `MAX_UPLOAD_BYTES` in the
+backend environment to override the limit. Requests with an oversized declared
+`Content-Length` are rejected before multipart parsing; the parsed file size is
+also checked before processing. Configure the hosting proxy with a matching
+body-size limit so requests without `Content-Length` are bounded during upload.

@@ -22,7 +22,16 @@ const ProcessingPage = () => {
         const response = inputMode === "url"
           ? await processVideoUrl(videoUrl, projectId, accessToken)
           : videoFile ? await processVideoFile(videoFile, projectId, accessToken) : null;
-        if (!response?.ok) throw new Error("Processing failed");
+        if (!response?.ok) {
+          let message = "Unable to start processing. Please try again.";
+          try {
+            const payload = await response?.json();
+            if (typeof payload?.detail === "string") message = payload.detail;
+          } catch {
+            // Keep the actionable fallback when the server did not return JSON.
+          }
+          throw new Error(message);
+        }
         const reader = response.body?.getReader();
         if (!reader) throw new Error("Processing stream was unavailable");
         const decoder = new TextDecoder();

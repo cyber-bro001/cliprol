@@ -12,6 +12,7 @@ export const signUpWithEmail = async ({
       email: email,
       password: password,
       options: {
+        emailRedirectTo: `${window.location.origin}/login`,
         data: {
           name: name,
         },
@@ -43,6 +44,19 @@ export const signInWithEmail = async ({
     return { success: true, data };
   } catch (error) {
     console.error("Error signing in:", error);
+    return { success: false, error };
+  }
+};
+
+export const signInWithGoogle = async (): Promise<AuthResult> => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/login` },
+    });
+    if (error) return { success: false, error };
+    return { success: true, data };
+  } catch (error) {
     return { success: false, error };
   }
 };

@@ -42,22 +42,23 @@ def list_project_objects(bucket, user_id: str, project_id: str) -> list[str]:
     return paths
 
 
-def cleanup_project(user_id: str, project_id: str, attempted_paths=()):
+def cleanup_project(user_id: str, project_id: str, attempted_paths=(), *, client):
     """Caller supplies verified identity; independently recheck ownership.
 
     Missing project is idempotent. Never delete metadata after Storage failure.
     The migration supplies the clips -> projects ON DELETE CASCADE contract.
     """
-    from supabase_folder.supabase_client import supabase
     project_prefix(user_id, project_id)
-    rows = supabase.table('projects').select('id,user_id').eq('id', project_id).execute().data
+    rows = client.table('projects').select('id,user_id').eq('id', project_id).execute().data
     if rows is None:
         raise RuntimeError('Could not verify project ownership')
     if not rows:
         return
     if len(rows) != 1 or rows[0]['user_id'] != user_id:
         raise PermissionError('Project is not owned by this user')
-    bucket = supabase.storage.from_('clips')
+    # The clips bucket policy deliberately denies direct authenticated access.
+    from supabase_folder.supabase_client import supabase as storage_client
+    bucket = storage_client.storage.from_('clips')
     paths = set(list_project_objects(bucket, user_id, project_id))
     paths.update(validate_project_path(path, user_id, project_id) for path in attempted_paths)
     paths = sorted(paths)
@@ -65,7 +66,7 @@ def cleanup_project(user_id: str, project_id: str, attempted_paths=()):
         bucket.remove(paths[offset:offset + 100])
     if list_project_objects(bucket, user_id, project_id):
         raise RuntimeError('Some project Storage objects remain')
-    supabase.table('projects').delete().eq('id', project_id).eq('user_id', user_id).execute()
-    remaining = supabase.table('projects').select('id').eq('id', project_id).eq('user_id', user_id).execute().data
+    client.table('projects').delete().eq('id', project_id).eq('user_id', user_id).execute()
+    remaining = client.table('projects').select('id').eq('id', project_id).eq('user_id', user_id).execute().data
     if remaining is None or remaining:
         raise RuntimeError('Project metadata deletion was not confirmed')

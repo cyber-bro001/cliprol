@@ -5,6 +5,7 @@ import type { CliprolProviderProps } from "../types";
 import {
   signUpWithEmail,
   signInWithEmail,
+  signInWithGoogle,
   signOut,
 } from "../lib/supabase/auth";
 import { supabase } from "../lib/supabase/supabaseClient";
@@ -71,6 +72,7 @@ export const CliprolProvider = ({ children }: CliprolProviderProps) => {
         setSession,
         signUpWithEmail,
         signInWithEmail,
+        signInWithGoogle,
         signOut,
       }}
     >

@@ -1,7 +1,10 @@
 import json
+import logging
 import os
+import time
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 from moviepy import VideoFileClip
 import asyncio
 from services.blocking import run_blocking
@@ -9,6 +12,9 @@ from services.blocking import run_blocking
 load_dotenv()
 
 GEMINI = os.getenv("GEMINI_API_KEY")
+FILE_PROCESSING_TIMEOUT_SECONDS = float(os.getenv("GEMINI_FILE_PROCESSING_TIMEOUT_SECONDS", "3600"))
+GEMINI_HTTP_TIMEOUT_MS = int(os.getenv("GEMINI_HTTP_TIMEOUT_MS", "1200000"))
+logger = logging.getLogger(__name__)
 
 
 async def detect_moments_with_progress(video_path):
@@ -19,7 +25,10 @@ async def detect_moments_with_progress(video_path):
         ("progress", message) - a progress message to forward to the client
         ("result", moments)   - the final detected moments
     """
-    client = genai.Client(api_key=GEMINI)
+    client = genai.Client(
+        api_key=GEMINI,
+        http_options=types.HttpOptions(timeout=GEMINI_HTTP_TIMEOUT_MS),
+    )
 
     yield ("progress", "Uploading video for analysis")
 
@@ -30,13 +39,31 @@ async def detect_moments_with_progress(video_path):
     finally:
         src.close()
 
+    stage_started = time.perf_counter()
     video_file = await run_blocking(client.files.upload, file=video_path)
+    logger.info("Gemini video upload completed in %.1f seconds", time.perf_counter() - stage_started)
 
     yield ("progress", "Analyzing video content...")
 
+    stage_started = time.perf_counter()
+    last_progress = stage_started
     while video_file.state.name == "PROCESSING":
+        elapsed = time.perf_counter() - stage_started
+        if elapsed >= FILE_PROCESSING_TIMEOUT_SECONDS:
+            raise TimeoutError(
+                f"Gemini did not finish processing the video within "
+                f"{FILE_PROCESSING_TIMEOUT_SECONDS:g} seconds"
+            )
         await asyncio.sleep(5)
         video_file = await run_blocking(client.files.get, name=video_file.name)
+        now = time.perf_counter()
+        if now - last_progress >= 30:
+            logger.info("Gemini is still processing video (%.1f seconds elapsed)", now - stage_started)
+            last_progress = now
+
+    if video_file.state.name != "ACTIVE":
+        raise RuntimeError(f"Gemini video processing ended in state {video_file.state.name}")
+    logger.info("Gemini video processing completed in %.1f seconds", time.perf_counter() - stage_started)
 
 
     prompt = f"""
@@ -86,6 +113,7 @@ Format:
 
     yield ("progress", "Generating the best moments")
 
+    stage_started = time.perf_counter()
     response = await run_blocking(
         client.models.generate_content,
         model="gemini-2.5-flash",
@@ -94,6 +122,7 @@ Format:
             prompt
         ]
     )
+    logger.info("Gemini moment analysis completed in %.1f seconds", time.perf_counter() - stage_started)
 
     result = response.text
 

@@ -43,7 +43,6 @@ export async function createProject({
 
   return data;
 }
-
 // Fetch all projects for the authenticated user
 // The user filter scopes the query; deployed RLS must enforce ownership independently.
 export async function getUserProjects(userId: string, signal?: AbortSignal): Promise<Project[]> {
@@ -84,32 +83,3 @@ export async function getProject(projectId: string, userId: string, signal?: Abo
 
   return data;
 }
-
-//UPDATE PROJECT STATUS
-export async function updateProject(
-  projectId: string,
-  updates: {
-    title?: string;
-    status?: "processing" | "done" | "error";
-    inputUrl?: string;
-  },
-) {
-  const { data, error } = await supabase
-    .from("projects")
-    .update({
-      ...(updates.title !== undefined && { title: updates.title }),
-      ...(updates.status !== undefined && { status: updates.status }),
-      ...(updates.inputUrl !== undefined && { input_url: updates.inputUrl }),
-    })
-    .eq("id", projectId)
-    .select()
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-//

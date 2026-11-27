@@ -4,6 +4,7 @@ import { validateForm, type FormErrors } from "./validateForm";
 
 type SubmitResult = {
   success: boolean;
+  data?: unknown;
   error?: unknown;
 };
 
@@ -14,7 +15,7 @@ type HandleSubmitOptions = {
   setLoading: (loading: boolean) => void;
   setFieldErrors: (errors: FormErrors) => void;
   setSubmitError: (error: string | null) => void;
-  onSuccess: () => void;
+  onSuccess: (result: SubmitResult) => void;
 };
 
 const getErrorMessage = (error: unknown) => {
@@ -43,18 +44,18 @@ export const createHandleSubmit = ({
 
     setLoading(true);
     try {
-      const { success, error } = await submit({
+      const result = await submit({
         ...formData,
         email: formData.email.trim(),
         name: formData.name?.trim(),
       });
 
-      if (!success) {
-        setSubmitError(getErrorMessage(error));
+      if (!result.success) {
+        setSubmitError(getErrorMessage(result.error));
         return;
       }
 
-      onSuccess();
+      onSuccess(result);
     } catch (error) {
       setSubmitError(getErrorMessage(error));
     } finally {

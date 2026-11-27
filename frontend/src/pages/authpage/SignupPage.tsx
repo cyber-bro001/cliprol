@@ -16,8 +16,10 @@ const SignupPage = () => {
   const [loading, setLoading] = useState<loadingStateType["isLoading"]>(false);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
-  const { signUpWithEmail } = useCliprolContext();
+  const { signUpWithEmail, signInWithGoogle } = useCliprolContext();
   const navigate = useNavigate();
   const location = useLocation();
   const handleSubmit = createHandleSubmit({
@@ -27,8 +29,21 @@ const SignupPage = () => {
     setLoading,
     setFieldErrors,
     setSubmitError,
-    onSuccess: () => navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl"), hasPendingUpload()), { replace: true }),
+    onSuccess: (result) => {
+      const data = result.data as { session?: unknown } | undefined;
+      if (!data?.session) {
+        setVerificationSent(true);
+        return;
+      }
+      navigate(loginDestination(location.state, sessionStorage.getItem("cliprol.pendingVideoUrl"), hasPendingUpload()), { replace: true });
+    },
   });
+
+  const continueWithGoogle = async () => {
+    setGoogleError(null);
+    const result = await signInWithGoogle();
+    if (!result.success) setGoogleError(result.error instanceof Error ? result.error.message : "Google sign-in could not be started. Please try again.");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
@@ -108,6 +123,7 @@ const SignupPage = () => {
           </label>
 
           {submitError && <p role="alert" className="text-xs text-red-400">{submitError}</p>}
+          {verificationSent && <p role="status" className="text-sm text-[var(--color-text-muted)]">Check your email to confirm your account. Then sign in to continue.</p>}
 
           <button
             type="submit"
@@ -127,7 +143,8 @@ const SignupPage = () => {
         </div>
 
         {/* Google */}
-        <button className="w-full flex items-center justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium py-3 rounded-[var(--radius-sm)] hover:border-[var(--color-text-muted)] cursor-pointer transition-colors duration-150">
+        {googleError && <p role="alert" className="mb-3 text-xs text-red-400">{googleError}</p>}
+        <button type="button" onClick={continueWithGoogle} className="w-full flex items-center justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium py-3 rounded-[var(--radius-sm)] hover:border-[var(--color-text-muted)] cursor-pointer transition-colors duration-150">
           <svg width="16" height="16" viewBox="0 0 24 24">
             <path
               fill="#4285F4"

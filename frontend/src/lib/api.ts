@@ -32,9 +32,12 @@ export async function getAccessibleClips(projectId: string, accessToken: string,
     signal,
   });
   if (!response.ok) {
-    throw new Error(response.status === 403
-      ? "You do not have access to this project."
-      : "Unable to load private clips. Please reload the page.");
+    if (response.status === 401) throw new Error("Your session has expired. Sign in again to view this project.");
+    if (response.status === 404) throw new Error("Project not found or unavailable.");
+    if (response.status === 409) throw new Error("This project is not ready to view yet.");
+    throw new Error(response.status >= 500
+      ? "Clip service is temporarily unavailable. Please try again."
+      : "Unable to load private clips. Please try again.");
   }
   return (await response.json()).clips;
 }
